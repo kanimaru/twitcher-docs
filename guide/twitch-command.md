@@ -49,7 +49,7 @@ These properties define the behavior and rules for the command:
     *   `ANYWHERE`: Can be triggered in both chat and whispers.
 *   **`Allowed Users` (`Array[String]`)**: *Optional.* If non-empty, only usernames listed in this array can execute the command.
 *   **`Listen To Chatrooms` (`Array[String]`)**: *Optional.* If non-empty, the command only respond if the message originated from one of the specified chatrooms (broadcaster usernames). *Note: Ensure the connected EventSub is receiving messages from these chatrooms.*
-*   **`Eventsub` (`TwitchEventsub`)**: **Required.** The `TwitchEventsub` instance that will provide the chat/whisper events for this command to process.
+*   **`Eventsub` (`TwitchEventsub`)**: **Required.** The `TwitchEventsub` instance that will provide the chat/whisper events for this command to process. When you have only one Eventsub node, it will be automatically assigned.
 
 ## Signals
 
