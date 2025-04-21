@@ -4,6 +4,9 @@ import { defineConfig } from 'vitepress'
 export default defineConfig({
   title: "Twitcher Doc",
   description: "Documentation for Twitcher",
+  vite: {
+    assetsInclude: ['**/*.svg']
+  },
   themeConfig: {
     // https://vitepress.dev/reference/default-theme-config
     nav: [
