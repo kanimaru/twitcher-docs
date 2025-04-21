@@ -13,7 +13,7 @@ build_app:
     - echo "Installing dependencies with bun..."
     - bun install --frozen-lockfile
     - echo "Building the application..."
-    - bun run build
+    - bun run docs:build
   artifacts:
     paths:
       - .vitepress/dist/
