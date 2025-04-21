@@ -15,4 +15,4 @@ Twitcher uses OAuth 2.0 to securely authenticate with Twitch APIs. You'll need c
 
 ## Configuring Twitcher
 
-For easier setup use the provided setup screen. When you accidentally closed it you can reopen it via: ![open-setup-tooltip.png](../images/open-setup-tooltip.png)
+For easier setup use the provided setup screen. When you accidentally closed it you can reopen it via: ![open-setup-tooltip.png](/open-setup-tooltip.png)

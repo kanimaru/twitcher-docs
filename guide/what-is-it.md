@@ -9,13 +9,13 @@ Twitcher provides the tools to make it happen directly within the Godot editor a
 List of all nodes that are used in the most use cases.
 
 ### TwitchService
-![service-icon.svg](../images/service-icon.svg)
+![service-icon.svg](/service-icon.svg)
 
 `TwitchService` is the central hub for interacting with Twitch. It acts as a high-level interface, simplifying common
 tasks by coordinating the underlying components like `TwitchAPI`, `TwitchIRC`, `TwitchEventsub`, and `TwitchAuth`.
 
 ### TwitchAPI
-![api-icon.svg](../images/api-icon.svg)
+![api-icon.svg](/api-icon.svg)
 
 `TwitchAPI` gives you direct access to all the Twitch API related functions. This one is fully generated and the code 
 to regenerate the API is located in `TwitchAPIParser` and `TwitchAPIGenerator`. Because Twitch is not officially hosting 
@@ -24,7 +24,7 @@ a proper Swagger Twitcher uses the work of https://twitch-api-swagger.surge.sh/ 
 the Twitch API.
 
 ### TwitchAuth
-![auth-icon.svg](../images/auth-icon.svg)
+![auth-icon.svg](/auth-icon.svg)
 
 `TwitchAuth` manages the entire authorization process using various OAuth grant types and ensures your access token remains active through automatic refreshing.
 
@@ -50,7 +50,7 @@ the Twitch API.
     *   *Example Use Cases:* Avoid for new development.
 
 ### TwitchChat
-![chat-icon.svg](../images/chat-icon.svg)
+![chat-icon.svg](/chat-icon.svg)
 
 The `TwitchChat` node provides an easy way to interact with a Twitch channel's chat. It handles receiving chat messages 
 for a designated `broadcaster_user` via Twitch EventSub and allows sending messages as a specific sender_user 
@@ -58,7 +58,7 @@ for a designated `broadcaster_user` via Twitch EventSub and allows sending messa
 and `TwitchMediaLoader` nodes to function correctly.
 
 ### TwitchCommand
-![command-icon.svg](../images/command-icon.svg)
+![command-icon.svg](/command-icon.svg)
 
 The `TwitchCommand` node represents a single, specific chat command (like `!hello` or `!lurk`). 
 It listens for chat messages (and optionally whispers) via a linked `TwitchEventsub` node. 
@@ -68,7 +68,7 @@ correct location (`WhereFlag`), it emits a `command_received` signal. If the com
 (wrong args, permissions), it emits `received_invalid_command`.
 
 ### TwitchEventListener
-![event-icon.svg](../images/event-icon.svg)
+![event-icon.svg](/event-icon.svg)
 
 The `TwitchEventListener` node acts as a focused signal emitter for a single *specific type* of Twitch EventSub event 
 (like follows, subs, cheers, etc.). You configure it to listen for one event type defined in `TwitchEventsubDefinition.Type`. 
@@ -76,7 +76,7 @@ It connects to a main `TwitchEventsub` node and filters the events, emitting its
 **Crucially, it requires that the subscription for this event type has already been established** (either automatically or manually) in the linked `TwitchEventsub` node.
 
 ### TwitchMediaLoader
-![media-loader-icon.svg](../images/media-loader-icon.svg)
+![media-loader-icon.svg](/media-loader-icon.svg)
 
 `TwitchMediaLoader` is responsible for downloading, caching (both to disk and in memory), and providing access to 
 various Twitch visual assets like emotes, badges, cheermotes, and user profile pictures. It interacts with the 
@@ -86,7 +86,7 @@ various Twitch visual assets like emotes, badges, cheermotes, and user profile p
 and provides fallback textures for missing assets.
 
 ### TwitchIRC
-![chat-icon.svg](../images/chat-icon.svg)
+![chat-icon.svg](/chat-icon.svg)
 
 TwitchIRC connects to IRC chat servers using WebSockets. It handles authentication, 
 joining/leaving channels, sending chat messages (with rate limiting), and receiving various IRC messages and events 
@@ -95,7 +95,7 @@ corresponding signals with structured data (using TwitchTags helper classes) for
 marked as deprecated because Twitch plans to phase out IRC functionality in favor of EventSub-based solutions.**
 
 ### TwitchIrcChannel
-![chat-icon.svg](../images/chat-icon.svg)
+![chat-icon.svg](/chat-icon.svg)
 
 `TwitchIrcChannel` acts as a dedicated interface for interacting with a *single specific* Twitch channel via the underlying 
 (deprecated) `TwitchIRC` system. It filters messages and state updates received from a main `TwitchIRC` node 
