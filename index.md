@@ -58,4 +58,3 @@ This documentation covers **Twitcher v2**, specifically for **Godot 4.x**.
 ## Next Steps
 
 *   Ready to integrate? Head to the **[Getting Started](./guide/getting-started.md)** guide.
-*   Explore the available signals and methods in the **[API Reference](./api/reference.md)**.
