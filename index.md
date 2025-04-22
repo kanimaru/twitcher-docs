@@ -4,16 +4,13 @@ layout: home
 
 hero:
   name: "Twitcher"
-  text: "seamless Twitch integration for Godot"
-  tagline: Connect your Godot overlay or game to Twitch. Integrate chat, events (follows, subs, bits, rewards etc.) and use Twitch API with ease. Built for Godot 4.4 and higher.
+  text: "Seamless Twitch Integration for Godot"
+  tagline: Add Twitch chat, events, and API to Godot 4.4+ seamlessly.
   image:
       src: /logo.png
       alt: Twitcher Logo
   actions:
     - theme: brand
-      text: Home
-      link: /
-    - theme: alt
       text: Quickstart
       link: /guide/getting-started
     - theme: alt

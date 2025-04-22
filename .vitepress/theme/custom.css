@@ -1,0 +1,11 @@
+﻿:root {
+    --vp-c-brand-1: #4FDEE9;
+    --vp-c-brand-2: #ae4fe9;
+}
+
+body {
+    font-family: "Quicksand", sans-serif;
+    font-optical-sizing: auto;
+    font-weight: normal;
+    font-style: normal;
+}
