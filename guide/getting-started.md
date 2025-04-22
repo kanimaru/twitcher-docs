@@ -4,7 +4,7 @@ This guide will walk you through installing and setting up the Twitcher plugin i
 
 ## Prerequisites
 
-*   **Godot Engine:** Version 4.x is required.
+*   **Godot Engine:** Version 4.4 is required.
 *   **Twitch Account:** You need a Twitch account to interact with the API.
 *   **Twitch Application:** You'll need to register an application on the [Twitch Developer Console](https://dev.twitch.tv/console) to get credentials (Client ID, potentially Client Secret) for OAuth authentication.
 

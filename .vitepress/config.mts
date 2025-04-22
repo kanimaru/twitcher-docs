@@ -15,8 +15,9 @@ export default defineConfig({
       {
         text: 'Introduction',
         items: [
-          {text: 'Introduction', link: '/guide/what-is-it'},
-          {text: 'Getting Started', link: '/guide/getting-started'},
+          { text: 'Introduction', link: '/guide/what-is-it' },
+          { text: 'Getting Started', link: '/guide/getting-started' },
+          { text: 'FAQ', link: '/additional/faq.md' }
         ]
       },
       {
@@ -36,6 +37,15 @@ export default defineConfig({
           { text: 'IrcChannel', link: '/guide/twitch-irc-channel.md' },
           { text: 'MediaLoader', link: '/guide/twitch-media-loader.md' },
           { text: 'Service', link: '/guide/twitch-service.md' }
+        ]
+      },
+      {
+        text: 'Additional Features',
+        items: [
+          { text: 'BufferedHttpClient', link: '/additional/buffered-http-client.md' },
+          { text: 'Websocket', link: '/additional/websocket.md' },
+          { text: 'SpriteFrameEffect', link: '/additional/sprite-frame-effect.md' },
+
         ]
       }
     ],
