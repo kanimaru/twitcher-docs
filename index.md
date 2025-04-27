@@ -12,7 +12,10 @@ hero:
   actions:
     - theme: brand
       text: Quickstart
-      link: /guide/getting-started
+      link: /introduction/getting-started
+    - theme: alt
+      text: Overview
+      link: /introduction/what-is-it
     - theme: alt
       text: View on GitHub
       link: https://github.com/kanimaru/twitcher
@@ -44,7 +47,6 @@ features:
     details: Provides easy use of animated emojis with native and external image transformer.
 ---
 
-<!-- You can add more markdown content below the features if needed -->
 
 ## What is Twitcher?
 
@@ -54,4 +56,4 @@ This documentation covers **Twitcher V2**, specifically for **Godot 4.4**.
 
 ## Next Steps
 
-*   Ready to integrate? Head to the **[Getting Started](./guide/getting-started.md)** guide.
+*   Ready to integrate? Head to the **[Getting Started](introduction/getting-started.md)** guide.

@@ -20,7 +20,7 @@ export default defineConfig({
     // https://vitepress.dev/reference/default-theme-config
     nav: [
       { text: 'Home', link: '/' },
-      { text: 'Docs', link: '/guide/what-is-it' },
+      { text: 'Docs', link: '/core-nodes/what-is-it' },
       { text: 'FAQ', link: '/additional/faq' },
     ],
 
@@ -28,22 +28,22 @@ export default defineConfig({
       {
         text: 'Introduction',
         items: [
-          { text: 'Overview', link: '/guide/what-is-it' },
-          { text: 'Getting Started', link: '/guide/getting-started' },
-          { text: 'FAQ', link: '/additional/faq.md' }
+          { text: 'Overview', link: '/introduction/what-is-it' },
+          { text: 'Getting Started', link: '/introduction/getting-started' },
+          { text: 'FAQ', link: '/introduction/faq.md' }
         ]
       },
       {
         text: 'Core Nodes',
         items: [
-          { text: 'Chat', link: '/guide/twitch-chat.md' },
-          { text: 'Command', link: '/guide/twitch-command.md' },
-          { text: 'EventListener', link: '/guide/twitch-event-listener.md' },
-          { text: 'ImageTransformer', link: '/guide/twitch-image-transformer.md' },
-          { text: 'MediaLoader', link: '/guide/twitch-media-loader.md' },
-          { text: 'Service', link: '/guide/twitch-service.md' },
-          { text: 'Irc', link: '/guide/twitch-irc.md' },
-          { text: 'IrcChannel', link: '/guide/twitch-irc-channel.md' },
+          { text: 'Chat', link: '/core-nodes/twitch-chat.md' },
+          { text: 'Command', link: '/core-nodes/twitch-command.md' },
+          { text: 'EventListener', link: '/core-nodes/twitch-event-listener.md' },
+          { text: 'ImageTransformer', link: '/core-nodes/twitch-image-transformer.md' },
+          { text: 'MediaLoader', link: '/core-nodes/twitch-media-loader.md' },
+          { text: 'Service', link: '/core-nodes/twitch-service.md' },
+          { text: 'Irc', link: '/core-nodes/twitch-irc.md' },
+          { text: 'IrcChannel', link: '/core-nodes/twitch-irc-channel.md' },
         ]
       },
       {
