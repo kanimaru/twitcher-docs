@@ -72,5 +72,8 @@ export default defineConfig({
     socialLinks: [
       { icon: 'github', link: 'https://github.com/kanimaru/twitcher' }
     ]
-  }
+  },
+  ignoreDeadLinks: [
+    /^https?:\/\/localhost/,
+  ]
 })
