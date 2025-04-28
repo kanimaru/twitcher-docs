@@ -15,11 +15,8 @@ tasks by coordinating the underlying components like `TwitchAPI`, `TwitchChat`, 
 ## TwitchAPI
 ![api-icon.svg](/api-icon.svg)
 
-`TwitchAPI` gives you direct access to all the Twitch API related functions. This one is fully generated and the code 
-to regenerate the API is located in `TwitchAPIParser` and `TwitchAPIGenerator`. Because Twitch is not officially hosting 
-a proper Swagger, Twitcher uses the work of https://twitch-api-swagger.surge.sh/ credits goes to 
-[DmitryScaletta](https://github.com/DmitryScaletta) for his awesome work to provide this technical documentation of 
-the Twitch API.
+The `TwitchAPI` node is the central component for making authenticated calls to the Twitch Helix REST API.
+It handles the necessary headers, authentication tokens, and provides a foundation for interacting with various API endpoints.
 
 ## TwitchAuth
 ![auth-icon.svg](/auth-icon.svg)
