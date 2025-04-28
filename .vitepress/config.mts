@@ -47,6 +47,15 @@ export default defineConfig({
         ]
       },
       {
+        text: 'Editor Support',
+        items: [
+          { text: 'Editor Authorization', link: '/editor/editor-authorization.md' },
+          { text: 'Twitch User', link: '/editor/twitch-user.md' },
+          { text: 'Eventsub', link: '/editor/editor-eventsub.md' },
+          { text: 'Scopes', link: '/editor/editor-scopes.md' },
+        ]
+      },
+      {
         text: 'Additional Features',
         items: [
           { text: 'BufferedHttpClient', link: '/additional/buffered-http-client.md' },
