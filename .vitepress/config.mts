@@ -36,6 +36,7 @@ export default defineConfig({
       {
         text: 'Core Nodes',
         items: [
+          { text: 'Api', link: '/core-nodes/twitch-api.md' },
           { text: 'Chat', link: '/core-nodes/twitch-chat.md' },
           { text: 'Command', link: '/core-nodes/twitch-command.md' },
           { text: 'EventListener', link: '/core-nodes/twitch-event-listener.md' },
