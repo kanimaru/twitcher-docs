@@ -61,6 +61,7 @@ export default defineConfig({
           { text: 'BufferedHttpClient', link: '/additional/buffered-http-client.md' },
           { text: 'Websocket', link: '/additional/websocket.md' },
           { text: 'SpriteFrameEffect', link: '/additional/sprite-frame-effect.md' },
+          { text: 'HelpCommand', link: '/additional/help-command.md' },
         ]
       },
       {
