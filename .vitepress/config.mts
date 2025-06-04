@@ -20,7 +20,7 @@ export default defineConfig({
     // https://vitepress.dev/reference/default-theme-config
     nav: [
       { text: 'Home', link: '/' },
-      { text: 'Docs', link: '/core-nodes/what-is-it' },
+      { text: 'Docs', link: '/introduction/what-is-it' },
       { text: 'FAQ', link: '/additional/faq' },
     ],
 
