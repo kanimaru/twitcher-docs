@@ -74,7 +74,8 @@ This node acts as a gateway to the Twitch API. Its main responsibilities include
 
 ## Usage Example (Using Wrapper Method `send_chat_message`)
 
-This example demonstrates how to send a chat message using the dedicated `send_chat_message` wrapper method.
+This example demonstrates how to send a chat message using the dedicated `send_chat_message` wrapper method. 
+For actually sending a chat message please use `TwitchChat.send_message` or `TwitchService.chat`.
 
 ```gdscript
 extends Node
@@ -84,11 +85,11 @@ extends Node
 func send_test_chat_message(message_text: String):
     # Get the authenticated user's info (requires API call itself)
     var user_response = await twitch_api.get_users(TwitchGetUsers.Opt.new()) # Assuming get_users exists
-    if user_response.error or user_response.data.is_empty():
+    if user_response.response.error or user_response.data.is_empty():
          printerr("Could not get current user info to send message.")
          return
 
-    var current_user: TwitchUser = user_response.data
+    var current_user: TwitchUser = user_response.data[0]
     var user_id = current_user.id
 
     # --- Create the request body object ---
@@ -111,7 +112,7 @@ func send_test_chat_message(message_text: String):
         printerr("Failed to send chat message! Response data is empty (unexpected).")
     else:
         # Process the specific response data from TwitchSendChatMessage.ResponseData
-        var result_data = send_response.data # Assuming 'data' is an array
+        var result_data = send_response.data[0] # Assuming 'data' is an array
         if result_data.is_sent:
             print("Chat message sent successfully!")
         else:

@@ -36,13 +36,13 @@ export default defineConfig({
       {
         text: 'Core Nodes',
         items: [
+          { text: 'Service', link: '/core-nodes/twitch-service.md' },
           { text: 'Api', link: '/core-nodes/twitch-api.md' },
           { text: 'Chat', link: '/core-nodes/twitch-chat.md' },
           { text: 'Command', link: '/core-nodes/twitch-command.md' },
           { text: 'EventListener', link: '/core-nodes/twitch-event-listener.md' },
           { text: 'ImageTransformer', link: '/core-nodes/twitch-image-transformer.md' },
           { text: 'MediaLoader', link: '/core-nodes/twitch-media-loader.md' },
-          { text: 'Service', link: '/core-nodes/twitch-service.md' },
           { text: 'Irc', link: '/core-nodes/twitch-irc.md' },
           { text: 'IrcChannel', link: '/core-nodes/twitch-irc-channel.md' },
         ]
