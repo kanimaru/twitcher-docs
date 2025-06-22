@@ -65,10 +65,8 @@ export default defineConfig({
           { text: 'HelpCommand', link: '/additional/help-command.md' },
         ]
       },
-      {
-        text: 'Showcase',
-        link: 'showcase'
-      }
+      { text: 'Showcase', link: 'showcase' },
+      { text: 'Support', link: '/introduction/support' }
     ],
 
     socialLinks: [
