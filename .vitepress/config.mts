@@ -63,10 +63,11 @@ export default defineConfig({
           { text: 'Websocket', link: '/additional/websocket.md' },
           { text: 'SpriteFrameEffect', link: '/additional/sprite-frame-effect.md' },
           { text: 'HelpCommand', link: '/additional/help-command.md' },
+          { text: 'Paging', link: '/additional/paging.md' },
         ]
       },
       { text: 'Showcase', link: 'showcase' },
-      { text: 'Support', link: '/introduction/support' }
+      { text: 'Support', link: '/introduction/support.md' }
     ],
 
     socialLinks: [
