@@ -1,126 +1,116 @@
 ﻿# TwitchCommand Node
 
-The `TwitchCommand` node is designed to define and handle a specific chat command within your Godot application. 
-It simplifies parsing messages, checking permissions, and validating arguments for commands.
+The `TwitchCommand` node is the standard way to create traditional, prefix-based chat commands (e.g., `!lurk`, `!so`). 
+It handles parsing the command name, validating argument counts, and inherits all permission and cooldown checks from `TwitchCommandBase`.
 
 ## Overview
 
-Each `TwitchCommand` node typically represents one command (e.g., `!sayhi`). 
-You configure its name, aliases, required permissions, argument rules, and where it should listen (chat/whispers). 
-It relies on an associated `TwitchEventsub` node to receive the raw message events from Twitch.
+This is the most common command type. It's designed to be triggered when a chat message starts with a specific prefix 
+(like `!`) followed by a command name.
 
-When a message arrives that matches the command's trigger (prefix + name/alias), the node automatically performs several checks:
-1. **Prefix:** Does the message start with a known prefix (e.g., `!`)?
-2. **Name/Alias:** Does the first word match the `command` name or any of its `aliases`?
-3. **Allowed Users:** Checks that only `allowed_users` can use this command
-4. **Allowed Chatrooms** Checks that only commands within the chat rooms can be used `listen_to_chatrooms` 
-5. **Where:** Was the command used in an allowed location (Chat/Whisper based on `where` flag)?
-6. **Permissions:** Does the user have the required `permission_level` (VIP, Sub, Mod, Streamer)?
-7. **Arguments:** Does the number of provided arguments fall within the `args_min` and `args_max` range?
-
-Based on these checks, it emits either the `command_received` or `received_invalid_command` signal.
+The workflow is as follows:
+1.  A chat message is received.
+2.  The node checks if the message starts with one of its configured `command_prefixes`.
+3.  It then checks if the first word after the prefix matches its `command` name or one of its `aliases`.
+4.  If the prefix and command name match, it proceeds with the standard checks inherited from `TwitchCommandBase`: permissions, location (`where`), user whitelists, and cooldowns.
+5.  If all those checks pass, it validates the number of arguments provided against `args_min` and `args_max`.
+6.  If all checks are successful, the `command_received` signal is emitted.
+7.  If any check fails, a corresponding signal (`invalid_permission`, `cooldown`, `received_invalid_command`) is emitted.
 
 ## Prerequisites
 
-1.  **Add the Node:** Add one or more `TwitchCommand` nodes to your scene. They are often managed as children of a central node (like `TwitchService` or a dedicated command handler node).
-2.  **EventSub Dependency:** Assign a configured `TwitchEventsub` instance to the `Eventsub` property of the `TwitchCommand` node in the Inspector. This is how the node receives messages to process. When you just have one `TwitchEventsub` in your scene it will assign it automatically.
+1.  **Add the Node:** Add a `TwitchCommand` node to your scene for each command you want to create.
+2.  **Message Source:** The node requires a source for chat messages, typically provided by a configured `TwitchEventsub` node in your project. 
+    When not set, it will automatically take the first `TwitchEventsub` node it finds in the scene.
 
 ## Configuration (Inspector Properties)
 
-These properties define the behavior and rules for the command:
-
-*   **`Command` (`String`)**: **Required.** The primary name of the command (e.g., "lurk", "hello"). Users trigger it by typing a prefix (like `!`) followed by this name.
-*   **`Aliases` (`Array[String]`)**: *Optional.* A list of alternative names for this command (e.g., ["hi", "hey"] for a "hello" command).
-*   **`Description` (`String`, multiline)**: *Optional.* A user-facing description of what the command does. Useful for help commands or documentation.
+*   **`Command Prefixes` (`Array[String]`)**: **Required.** A list of single-character prefixes that can trigger this command. Default is `["!"]`.
+*   **`Aliases` (`Array[String]`)**: *Optional.* A list of alternative names for this command (e.g., `["roll", "d6"]` for a "dice" command).
 *   **`Args Min` (`int`)**: The minimum number of arguments required after the command name. `0` means no arguments are needed.
 *   **`Args Max` (`int`)**: The maximum number of arguments allowed. `-1` means there is no upper limit (infinite arguments).
-*   **`Permission Level` (`PermissionFlag`)**: The minimum permission level required to execute the command. Uses bit flags, allowing combinations.
-    *   `EVERYONE`: No specific permission needed.
-    *   `VIP`: User must be a VIP.
-    *   `SUB`: User must be a Subscriber.
-    *   `MOD`: User must be a Moderator.
-    *   `STREAMER`: User must be the Broadcaster.
-    *   `MOD_STREAMER`: User must be a Mod OR the Streamer.
-    *   `NON_REGULAR`: Allows anyone *except* regular viewers (effectively VIP, Sub, Mod, Streamer).
-    *   **Note:** These are bit flags, so you can combine permissions if needed, though the predefined ones cover common cases.
-*   **`Where` (`WhereFlag`)**: Specifies where the command can be triggered.
-    *   `CHAT`: Only in regular channel chat messages.
-    *   `WHISPER`: Only in whisper messages (requires `user_whisper_message` EventSub subscription).
-    *   `ANYWHERE`: Can be triggered in both chat and whispers.
-*   **`Allowed Users` (`Array[String]`)**: *Optional.* If non-empty, only usernames listed in this array can execute the command.
-*   **`Listen To Chatrooms` (`Array[String]`)**: *Optional.* If non-empty, the command only respond if the message originated from one of the specified chatrooms (broadcaster usernames). *Note: Ensure the connected EventSub is receiving messages from these chatrooms.*
-*   **`Eventsub` (`TwitchEventsub`)**: **Required.** The `TwitchEventsub` instance that will provide the chat/whisper events for this command to process. When you have only one Eventsub node, it will be automatically assigned.
+
+*   **Inherited Properties from `TwitchCommandBase`:**
+    *   **`Command` (`String`)**: **Required.** The primary name of the command (e.g., "lurk", "hello").
+    *   **`Description` (`String`)**: A user-facing description of what the command does, used by `TwitchCommandHelp`.
+    *   **`Permission Level` (`PermissionFlag`)**: The minimum permission a user must have to execute this command.
+    *   **`Where` (`WhereFlag`)**: Defines where this command can be triggered (Chat, Whisper, or Anywhere).
+    *   **`Allowed Users` (`Array[String]`)**: A whitelist of user login names who can execute this command, bypassing the `Permission Level` check.
+    *   **`Listen To Chatrooms` (`Array[String]`)**: If non-empty, the command will only trigger in the specified chatrooms (broadcaster login names).
+    *   **`Case Insensitive` (`bool`)**: If `true`, the command name and aliases will be matched regardless of case (e.g., `!HELLO` will match `!hello`).
+    *   **`User Cooldown` (`float`)**: The time in seconds a specific user must wait before they can use this command again.
+    *   **`Global Cooldown` (`float`)**: The time in seconds that *everyone* must wait after the command is used before it can be used again.
 
 ## Signals
 
 *   **`command_received(from_username: String, info: TwitchCommandInfo, args: PackedStringArray)`**
-    *   Emitted when a message successfully matches the command name/alias and passes all validation checks (permissions, args, where, allowed users).
-    *   `from_username`: The Twitch username (login name) of the user who sent the command.
-    *   `info`: A `TwitchCommandInfo` object containing contextual details (like the original message data, target channel, etc.).
+    *   Emitted when a user successfully executes the command, passing all permission, cooldown, and argument count checks.
     *   `args`: A `PackedStringArray` containing the arguments provided after the command name.
-
 *   **`received_invalid_command(from_username: String, info: TwitchCommandInfo, args: PackedStringArray)`**
-    *   Emitted when a message matches the command name/alias but fails one of the validation checks (e.g., insufficient permissions, incorrect number of arguments).
-    *   Parameters are the same as `command_received`. Useful for providing feedback to the user about why the command failed.
+    *   Emitted specifically when the command is triggered with an incorrect number of arguments (too few or too many).
+*   **`invalid_permission(from_username: String, info: TwitchCommandInfo, args: PackedStringArray)`**
+    *   Emitted when a user tries to execute the command but does not have the required `permission_level`.
+*   **`cooldown(from_username: String, info: TwitchCommandInfo, args: PackedStringArray, cooldown_remaining_in_s: float)`**
+    *   Emitted when a user tries to execute the command while it is on either a user or global cooldown.
+    *   `cooldown_remaining_in_s`: The remaining cooldown time in seconds.
 
 ## Methods
 
 *   **`add_alias(alias: String) -> void`**
-    *   Programmatically adds a new alias (alternative name) to the command's `aliases` list.
-
-*   **`static create(eventsub: TwitchEventsub, cmd_name: String, callable: Callable, min_args: int = 0, max_args: int = 0, permission_level: int = PermissionFlag.EVERYONE, where: int = WhereFlag.CHAT, allowed_users: Array[String] = [], listen_to_chatrooms: Array[String] = []) -> TwitchCommand`**
-    *   A static factory function to create and configure a `TwitchCommand` node entirely via code.
-    *   `eventsub`: The `TwitchEventsub` node to use.
-    *   `cmd_name`: The main command name.
-    *   `callable`: The `Callable` (function reference) to connect to the `command_received` signal.
-    *   Other parameters correspond to the exported properties (`args_min`, `args_max`, `permission_level`, `where`, `allowed_users`, `listen_to_chatrooms`).
-    *   Returns the newly created and configured `TwitchCommand` instance. You still need to add this instance to the scene tree (`add_child()`) for it to become active.
+    *   Programmatically adds a new alias (alternative name) to the command's `aliases` list at runtime.
+*   **`static create(...) -> TwitchCommand`**
+    *   A static factory function to create and configure a `TwitchCommand` node entirely via code. This is useful for dynamically generating commands. The returned node must be added to the scene tree to become active.
 
 ## Usage Example
+
+Let's create a `!dice` command that requires one optional argument (the number of sides).
+
+**1. Configure the Node in the Editor:**
+
+*   Add a `TwitchCommand` node to your scene.
+*   In the Inspector:
+    *   Set **`Command`** to `"dice"`.
+    *   Set **`Args Min`** to `0`.
+    *   Set **`Args Max`** to `1`.
+    *   Set **`Description`** to `"Rolls a die. Optionally specify the number of sides (e.g., !dice 20)."`.
+    *   Set **`User Cooldown`** to `5.0` (each user can roll every 5 seconds).
+
+**2. Connect via Script:**
 
 ```gdscript
 extends Node
 
-# Assuming you have TwitchCommand nodes as children, or you create them dynamically
-
-@onready var twitch_chat: TwitchChat = %TwitchChat
-@onready var command_hello: TwitchCommand = $HelloCommand # Configured in Inspector
-@onready var command_say: TwitchCommand = $SayCommand     # Configured in Inspector
-
-# Or create dynamically:
-# var command_lurk: TwitchCommand
+@onready var dice_command: TwitchCommand = $DiceCommand
+@onready var twitch_chat: TwitchChat # For sending replies
 
 func _ready():
-    command_hello.command_received.connect(_on_hello_received)
-    command_say.command_received.connect(_on_say_received)
-    command_say.received_invalid_command.connect(_on_say_invalid)
+    dice_command.command_received.connect(_on_dice_roll)
+    dice_command.received_invalid_command.connect(_on_dice_invalid_args)
+    dice_command.cooldown.connect(_on_dice_cooldown)
+    print("Dice command is now active.")
 
-    # --- Setup for dynamically created node ---
-    # var eventsub_node = TwitchEventsub.instance # Get your EventSub instance
-    # if eventsub_node:
-    #    command_lurk = TwitchCommand.create(eventsub_node, "lurk", _on_lurk_received)
-    #    add_child(command_lurk) # IMPORTANT: Add to tree to activate
-    # else:
-    #    printerr("Cannot create !lurk command, EventSub instance not found.")
+# Called on a successful !dice command
+func _on_dice_roll(from_username: String, info: TwitchCommandInfo, args: PackedStringArray):
+    var max_roll = 6 # Default to a 6-sided die
+    if not args.is_empty():
+        # User provided an argument, try to use it
+        if args[0].is_valid_int():
+            max_roll = max(1, int(args[0])) # Ensure at least 1
+        else:
+            await twitch_chat.send_message("@%s, that's not a valid number!" % from_username)
+            return
 
-
-func _on_hello_received(from_username: String, info: TwitchCommandInfo, args: PackedStringArray):
-    print("%s said hello!" % from_username)
-    twitch_chat.send_message("Hi there, %s!" % from_username)
-
-
-func _on_say_received(from_username: String, info: TwitchCommandInfo, args: PackedStringArray):
-    # !say command likely requires arguments (configured with args_min=1)
-    var message_to_say = " ".join(args) # Join all arguments into a single string
-    print("%s wants me to say: %s" % [from_username, message_to_say])
-    twitch_chat.send_message(message_to_say)
+    var roll_result = randi_range(1, max_roll)
+    var reply_message = "@%s rolled a %d (1-%d)" % [from_username, roll_result, max_roll]
+    await twitch_chat.send_message(reply_message, info.original_message.message_id)
 
 
-func _on_say_invalid(from_username: String, info: TwitchCommandInfo, args: PackedStringArray):
-    print("User %s tried to use !say incorrectly." % from_username)
-    twitch_chat.send_message("@%s, the !say command needs something to say after it!" % from_username)
+# Called if the user provides too many arguments (e.g., !dice 20 10)
+func _on_dice_invalid_args(from_username: String, info: TwitchCommandInfo, args: PackedStringArray):
+    await twitch_chat.send_message("@%s, the !dice command only takes one number argument." % from_username)
 
 
-func _on_lurk_received(from_username: String, info: TwitchCommandInfo, args: PackedStringArray):
-    twitch_chat.send_message("%s is now lurking." % from_username)
-```
+# Called when a user tries to use !dice while on cooldown
+func _on_dice_cooldown(from_username: String, info: TwitchCommandInfo, args: PackedStringArray, remaining_s: float):
+    # This is a good place for a silent failure or a whisper to avoid chat spam
+    print("User %s tried to use !dice while on cooldown (%.1fs left)." % [from_username, remaining_s])
