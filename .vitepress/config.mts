@@ -42,6 +42,7 @@ export default defineConfig({
           { text: 'Command', link: '/core-nodes/twitch-command.md' },
           { text: 'EventListener', link: '/core-nodes/twitch-event-listener.md' },
           { text: 'RedeemListener', link: '/core-nodes/twitch-redeem-listener.md' },
+          { text: 'PollListener', link: '/core-nodes/twitch-poll-listener.md' },
           { text: 'ImageTransformer', link: '/core-nodes/twitch-image-transformer.md' },
           { text: 'MediaLoader', link: '/core-nodes/twitch-media-loader.md' },
           { text: 'Bot', link: '/core-nodes/twitch-bot.md' },
