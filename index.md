@@ -5,7 +5,7 @@ layout: home
 hero:
   name: "Twitcher"
   text: "Seamless Twitch Integration for Godot"
-  tagline: Add Twitch chat, events, and API to Godot 4.4+ seamlessly.
+  tagline: Add Twitch chat, events, and API to Godot 4.6+ seamlessly.
   image:
       src: /logo.png
       alt: Twitcher Logo
@@ -52,7 +52,7 @@ features:
 
 Twitcher is a Godot Engine addon designed to bridge the gap between your game and the Twitch platform. Whether you want to display chat in-game, trigger events based on viewer interactions, or reward your audience, Twitcher provides the tools to make it happen directly within the Godot editor and your game's logic.
 
-This documentation covers **Twitcher V2**, specifically for **Godot 4.4**.
+This documentation covers **Twitcher V2**, specifically for **Godot 4.6**.
 
 ## Next Steps
 
