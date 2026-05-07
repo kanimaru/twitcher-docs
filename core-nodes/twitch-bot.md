@@ -9,7 +9,7 @@ This node is a self-contained system for a bot's chat functionality. It does not
 your project. Instead, it creates its own internal `TwitchAuth` and `TwitchAPI` instances to:
 
 1.  Manage a dedicated `OAuthToken` for your bot account.
-2.  Handle the authentication flow for that bot token.
+2.  Handle the authentication flow (uses Client Credentials flow) for that bot token.
 3.  Send chat messages using the bot's identity (`sender`) to a target channel (`receiver`).
 
 The primary purpose is to fulfill Twitch's requirements for sending messages that receive the "Bot" chat badge.
@@ -34,7 +34,8 @@ Without these specific permissions, attempts to send messages via this node will
     *   Create a **new, separate** `OAuthToken` resource file. This token will be used exclusively by the bot.
     *   Assign this new resource to the `Bot Token` property.
     *   You must ensure this token is authorized by the **Twitch account you intend to use as your bot**. This might 
-        involve a separate, one-time authorization process for that account.
+        involve a separate, one-time authorization process for that account. (There is an Editor Button for this)  
+    ![Authorize Sender](/explain-authorize-bot.png)
 4.  **Assign `Sender` and `Receiver`:** Assign `TwitchUser` resources for both the bot account (`Sender`) and the target channel's broadcaster (`Receiver`).
 
 ## Configuration (Inspector Properties)

@@ -39,7 +39,7 @@ export default defineConfig({
           { text: 'Service', link: '/core-nodes/twitch-service.md' },
           { text: 'Api', link: '/core-nodes/twitch-api.md' },
           { text: 'Chat', link: '/core-nodes/twitch-chat.md' },
-          { text: 'Command', link: '/core-nodes/twitch-command.md' },
+          { text: 'Command', link: '/commands/overview' },
           { text: 'EventListener', link: '/core-nodes/twitch-event-listener.md' },
           { text: 'RedeemListener', link: '/core-nodes/twitch-redeem-listener.md' },
           { text: 'PollListener', link: '/core-nodes/twitch-poll-listener.md' },
@@ -48,6 +48,17 @@ export default defineConfig({
           { text: 'Bot', link: '/core-nodes/twitch-bot.md' },
           { text: 'Irc', link: '/core-nodes/twitch-irc.md' },
           { text: 'IrcChannel', link: '/core-nodes/twitch-irc-channel.md' },
+        ]
+      },
+      {
+        text: 'Commands',
+        items: [
+          { text: 'Overview', link: '/commands/overview' },
+          { text: 'TwitchCommand (Prefix-based)', link: '/commands/twitch-command' },
+          { text: 'TwitchCommandRegex', link: '/commands/twitch-command-regex' },
+          { text: 'TwitchCommandContains', link: '/commands/twitch-command-contains' },
+          { text: 'TwitchCommandHelp', link: '/commands/twitch-command-help' },
+          { text: 'TwitchCommandInfo (Data)', link: '/commands/twitch-command-info' },
         ]
       },
       {
@@ -66,7 +77,6 @@ export default defineConfig({
           { text: 'BufferedHttpClient', link: '/additional/buffered-http-client.md' },
           { text: 'Websocket', link: '/additional/websocket.md' },
           { text: 'SpriteFrameEffect', link: '/additional/sprite-frame-effect.md' },
-          { text: 'HelpCommand', link: '/additional/help-command.md' },
           { text: 'Paging', link: '/additional/paging.md' },
         ]
       },
