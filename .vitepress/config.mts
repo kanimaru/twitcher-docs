@@ -21,7 +21,7 @@ export default defineConfig({
     nav: [
       { text: 'Home', link: '/' },
       { text: 'Docs', link: '/introduction/what-is-it' },
-      { text: 'FAQ', link: '/additional/faq' },
+      { text: 'FAQ', link: '/introduction/faq' },
     ],
 
     sidebar: [
