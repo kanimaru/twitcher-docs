@@ -22,7 +22,7 @@ The goal is to efficiently manage these assets, reducing redundant downloads and
 
 ## Prerequisites
 
-1.  **Add the Node:** Add a `TwitchMediaLoader` node to your scene, often as a child of `TwitchService` or as an autoload/singleton.
+1.  **Add the Node:** Add a `TwitchMediaLoader` node to your scene, often as a child of `TwitchService`. While it can be an autoload/singleton, adding it as a regular node is preferred to avoid polluting the global namespace.
 2.  **API Dependency:** Assign a configured `TwitchAPI` instance to the `Api` property in the Inspector. When you just have one `TwitchAPI` node in your scene it will assign it automatically.
 3.  **Image Transformer:** Ensure the `Image Transformer` property is assigned, especially if you need support for animated emotes or cheermotes use `NativeImageTransformer` or `MagicImageTransformer` see also [TwitchMediaLoader](twitch-media-loader.md)
 
@@ -119,7 +119,7 @@ func _ready():
     load_specific_emote("301544920") # Example KappaRoss emote ID
 
     # Example: Load current user's profile picture (assuming TwitchService exists)
-    var current_user: TwitchUser = await TwitchService.get_current_user()
+    var current_user: TwitchUser = await TwitchService.instance.get_current_user()
     load_user_profile(current_user)
     
     

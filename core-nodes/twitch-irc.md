@@ -95,7 +95,7 @@ This node emits various signals corresponding to different IRC events:
 ```gdscript
 extends Node
 
-# Assuming TwitchIRC node is accessible, e.g., as a child or autoload
+# Assuming TwitchIRC node is accessible, e.g., as a child
 @onready var twitch_irc: TwitchIRC = $TwitchService/TwitchIRC # Adjust path
 
 
@@ -109,7 +109,7 @@ func _ready():
     twitch_irc.connection_closed.connect(_on_irc_disconnected)
     twitch_irc.unauthenticated.connect(_on_irc_auth_failed)
 
-    # If not using TwitchService.setup(), you might need to manually start:
+    # If not using TwitchService.instance.setup(), you might need to manually start:
     await twitch_irc.open_connection()
 
 

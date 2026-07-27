@@ -87,7 +87,7 @@ extends Node
 
 func _ready() -> void:
     # Ensure TwitchService (and thus TwitchIRC) is set up first
-    # await TwitchService.setup() # Assuming TwitchService is accessible
+    # await TwitchService.instance.setup() # Assuming TwitchService is already in the node tree
 
     channel_one_handler.message_received.connect(_on_channel_one_message)
     channel_one_handler.has_joined.connect(_on_channel_joined.bind(&"Channel One"))

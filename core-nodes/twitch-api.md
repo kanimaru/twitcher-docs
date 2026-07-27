@@ -32,7 +32,7 @@ This node acts as a gateway to the Twitch API. Its main responsibilities include
 
 ## Prerequisites
 
-1.  **Add the Node:** Add a `TwitchAPI` node to your scene, often as a child of `TwitchService` or as an autoload/singleton.
+1.  **Add the Node:** Add a `TwitchAPI` node to your scene, often as a child of `TwitchService`. While it can be an autoload/singleton, adding it as a regular node is preferred to avoid polluting the global namespace.
 2.  **Token Resource:** Assign a configured and valid `OAuthToken` resource to the `Token` property. This token must have the necessary scopes granted for the API calls you intend to make.
 3.  **OAuth Settings Resource:** Assign a configured `OAuthSetting` resource (containing your Client ID) to the `Oauth Setting` property.
 
