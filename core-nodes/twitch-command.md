@@ -22,7 +22,7 @@ The workflow is as follows:
 1.  **Add the Node:** Add a `TwitchCommand` node to your scene for each command you want to create.
 2.  **Message Source:** The node requires a source for chat messages, typically provided by a configured `TwitchEventsub` node in your project. 
     When not set, it will automatically take the first `TwitchEventsub` node it finds in the scene.
-3. **Connect the Channel Chat Message Event**: If you haven't already - Make sure that you connect the `Channel Chat Message` event in your `TwitchEventsub` node. Otherwise commands will not work.
+3. **Connect the Channel Chat Message Subscription**: Make sure to have a `Channel Chat Message` subscription in `TwitchEventsub` node created. 
 
 ## Configuration (Inspector Properties)
 
