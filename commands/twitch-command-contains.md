@@ -27,6 +27,7 @@ This makes it perfect for simple keyword triggers, question detection, or filter
 2. **Message Source:** The node requires a source for chat messages, typically provided by a configured `TwitchEventsub`
    node in your project.
    When not set, it will automatically take the first `TwitchEventsub` node it finds in the scene.
+3. **Connect the Channel Chat Message Subscription**: Make sure to have a `Channel Chat Message` subscription in `TwitchEventsub` node created. 
 
 ## Configuration (Inspector Properties)
 
