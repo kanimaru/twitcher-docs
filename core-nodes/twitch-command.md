@@ -1,7 +1,9 @@
-﻿# TwitchCommand Node
+# TwitchCommand Node
 
 The `TwitchCommand` node is the standard way to create traditional, prefix-based chat commands (e.g., `!lurk`, `!so`). 
 It handles parsing the command name, validating argument counts, and inherits all permission and cooldown checks from `TwitchCommandBase`.
+
+<Badge type="tip" text="GDScript & C#" /> Every example on this page is available in both GDScript and C#: use the tabs on each code block to switch.
 
 ## Overview
 
@@ -54,12 +56,20 @@ The workflow is as follows:
     *   Emitted when a user tries to execute the command while it is on either a user or global cooldown.
     *   `cooldown_remaining_in_s`: The remaining cooldown time in seconds.
 
+::: tip C# note
+These are exposed as regular C# events on `TwitchCommand`: `CommandReceived`, `ReceivedInvalidCommand`, `InvalidPermission`, `Cooldown`: all with the signature `(string fromUsername, TwitchCommandInfo info, string[] args)` (plus `float cooldownRemainingInS` for `Cooldown`).
+:::
+
 ## Methods
 
 *   **`add_alias(alias: String) -> void`**
     *   Programmatically adds a new alias (alternative name) to the command's `aliases` list at runtime.
 *   **`static create(...) -> TwitchCommand`**
     *   A static factory function to create and configure a `TwitchCommand` node entirely via code. This is useful for dynamically generating commands. The returned node must be added to the scene tree to become active.
+
+::: tip C# note
+`add_alias(...)` → `command.AddAlias(...)` (also `command.RemoveAlias(...)`). There's no static `Create(...)` factory in C#; instead, build a `TwitchCommand` with a normal object initializer and register it via `TwitchService.Instance.AddCommand(command)`, which both creates the underlying node and adds it to the scene tree for you. See the example below.
+:::
 
 ## Usage Example
 
@@ -77,7 +87,9 @@ Let's create a `!dice` command that requires one optional argument (the number o
 
 **2. Connect via Script:**
 
-```gdscript
+::: code-group
+
+```gdscript [GDScript]
 extends Node
 
 @onready var dice_command: TwitchCommand = $DiceCommand
@@ -114,3 +126,70 @@ func _on_dice_invalid_args(from_username: String, info: TwitchCommandInfo, args:
 func _on_dice_cooldown(from_username: String, info: TwitchCommandInfo, args: PackedStringArray, remaining_s: float):
     # This is a good place for a silent failure or a whisper to avoid chat spam
     print("User %s tried to use !dice while on cooldown (%.1fs left)." % [from_username, remaining_s])
+```
+
+```csharp [C#]
+using Godot;
+using TwitcherSharp;
+using TwitcherSharp.Chat;
+
+public partial class YourNode : Node
+{
+    public override void _Ready()
+    {
+        var diceCommand = new TwitchCommand
+        {
+            Command = "dice",
+            ArgsMin = 0,
+            ArgsMax = 1,
+            Description = "Rolls a die. Optionally specify the number of sides (e.g., !dice 20).",
+            UserCooldown = 5.0,
+        };
+
+        TwitchService.Instance.AddCommand(diceCommand);
+        diceCommand.CommandReceived += OnDiceRoll;
+        diceCommand.ReceivedInvalidCommand += OnDiceInvalidArgs;
+        diceCommand.Cooldown += OnDiceCooldown;
+
+        GD.Print("Dice command is now active.");
+    }
+
+    // Called on a successful !dice command
+    private async void OnDiceRoll(string fromUsername, TwitchCommandInfo info, string[] args)
+    {
+        int maxRoll = 6; // Default to a 6-sided die
+        if (args.Length > 0)
+        {
+            // User provided an argument, try to use it
+            if (int.TryParse(args[0], out int parsed))
+            {
+                maxRoll = Math.Max(1, parsed); // Ensure at least 1
+            }
+            else
+            {
+                await TwitchChat.Instance.SendMessage($"@{fromUsername}, that's not a valid number!");
+                return;
+            }
+        }
+
+        int rollResult = GD.RandRange(1, maxRoll);
+        string replyMessage = $"@{fromUsername} rolled a {rollResult} (1-{maxRoll})";
+        await TwitchChat.Instance.SendMessage(replyMessage, info.ChatMessage.MessageId);
+    }
+
+    // Called if the user provides too many arguments (e.g., !dice 20 10)
+    private async void OnDiceInvalidArgs(string fromUsername, TwitchCommandInfo info, string[] args)
+    {
+        await TwitchChat.Instance.SendMessage($"@{fromUsername}, the !dice command only takes one number argument.");
+    }
+
+    // Called when a user tries to use !dice while on cooldown
+    private void OnDiceCooldown(string fromUsername, TwitchCommandInfo info, string[] args, float remainingS)
+    {
+        // This is a good place for a silent failure or a whisper to avoid chat spam
+        GD.Print($"User {fromUsername} tried to use !dice while on cooldown ({remainingS:F1}s left).");
+    }
+}
+```
+
+:::

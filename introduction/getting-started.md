@@ -47,6 +47,41 @@ This guide will walk you through installing and setting up the Twitcher plugin i
 
 3.  **Enable Plugin:** Open your Godot project, go to `Project` -> `Project Settings` -> `Plugins` tab. Find "Twitcher" in the list and check the `Enable` box.
 
+## C# Setup <Badge type="tip" text="Optional, C# only" />
+
+Twitcher itself is written in GDScript and works out of the box without any extra step. If you want to call it from
+**C#** instead (or alongside GDScript), add the [TwitcherSharp](https://github.com/Temptica/TwitcherSharp) NuGet
+package on top of the addon you just installed. If you're staying in GDScript, skip ahead to
+[Editor Configuration](#editor-configuration).
+
+1.  **Confirm requirements:**
+    *   Godot 4.6+ with C# support enabled (the .NET build of Godot).
+    *   [.NET SDK 10.0+](https://dotnet.microsoft.com/download) installed.
+    *   Twitcher itself already installed at `res://addons/twitcher/` (the previous step).
+
+2.  **Add the package** to your Godot C# project:
+
+    ```bash
+    dotnet add package Temptica.TwitcherSharp
+    ```
+
+    Or add it directly in your `.csproj`:
+
+    ```xml
+    <ItemGroup>
+      <PackageReference Include="Temptica.TwitcherSharp" Version="2.5.2" />
+    </ItemGroup>
+    ```
+
+    **Match the major/minor version to your installed Twitcher version**: TwitcherSharp's API mapping is generated
+    against a specific Twitcher release, and mismatched versions may not line up correctly.
+
+3.  **Build the project once** (`dotnet build`, or build from the Godot editor) so the C# bindings are picked up.
+
+From here on, every node and resource Twitcher exposes (`TwitchService`, `TwitchChat`, `TwitchAPI`, EventSub
+subscriptions, commands, ...) is available as a typed C# class, e.g. `TwitchService.Instance`. Pages throughout this
+documentation show both GDScript and C# side by side: use the tabs on each code block to switch.
+
 ## Editor Configuration
 
 To get started with Twitcher, you first need to run the **Setup**. 

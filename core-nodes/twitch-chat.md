@@ -1,8 +1,10 @@
-﻿# TwitchChat Node
+# TwitchChat Node
 
 The `TwitchChat` node simplifies reading and writing messages to a specific Twitch channel's chat room. 
 It uses Twitch EventSub for receiving messages and the Twitch API for sending them.
 It also integrates with `TwitchMediaLoader` to potentially utilize badge and emote data preloading. 
+
+<Badge type="tip" text="GDScript & C#" /> Every example on this page is available in both GDScript and C#: use the tabs on each code block to switch.
 
 ## Prerequisites
 
@@ -11,6 +13,10 @@ It also integrates with `TwitchMediaLoader` to potentially utilize badge and emo
     and assigned in the Inspector. If `TwitchChat` is a child of `TwitchService`, these might be assigned automatically or easily accessible.
     When each of the nodes exists only once in the scene, it will wire up automatically. 
 3.  **Configuration:** Select the `TwitchChat` node and configure its properties in the Inspector, **especially `Broadcaster User`**.
+
+::: tip C# note
+In C#, `%TwitchChat` from GDScript becomes the static property `TwitchChat.Instance`, the same `.Instance`/`.CreateInstance()` pattern used by `TwitchService` and `TwitchAPI`; see [TwitchService](/core-nodes/twitch-service) for details. Most of the time, though, you won't need `TwitchChat` directly at all: `TwitchService.Instance.Chat(...)`, `.Shoutout(...)` and `.Announcement(...)` cover the common cases.
+:::
 
 ## Configuration (Inspector Properties)
 
@@ -28,6 +34,10 @@ These properties configure the behavior of the `TwitchChat` node:
 *   **`message_received(message: TwitchChatMessage)`**
     *   Emitted when a new chat message arrives for the configured `broadcaster_user`'s channel.
     *   The `message` argument is a `TwitchChatMessage` object containing detailed information about the message, including the content, sender, badges, emotes, message ID, etc.
+
+::: tip C# note
+In C#: `TwitchChat.Instance.MessageReceived += OnChatMessageReceived;`
+:::
 
 ## Methods
 
@@ -49,9 +59,15 @@ These properties configure the behavior of the `TwitchChat` node:
         or provides a reason if it was dropped (e.g., by AutoMod).
     *   **Note:** This function internally uses `await` for API calls so you can `await` until the message was sent.
 
+::: tip C# note
+`subscribe()` → `TwitchChat.Instance.Subscribe()`. `send_message(...)` → `Task<TwitchSendChatMessageResponse.TwitchResponseData[]> TwitchChat.Instance.SendMessage(string message, string replyParentMessageId = null)`.
+:::
+
 ## Usage Example
 
-```gdscript
+::: code-group
+
+```gdscript [GDScript]
 extends Node
 
 @onready var twitch_chat: TwitchChat = %TwitchChat
@@ -83,3 +99,54 @@ func _send_test_message():
 	else:
 		printerr("Failed to send test message. Reason: ", response_data[0].drop_reason if not response_data.is_empty() else "Unknown")
 ```
+
+```csharp [C#]
+using Godot;
+using TwitcherSharp.Chat;
+
+public partial class YourNode : Node
+{
+    public override void _Ready()
+    {
+        TwitchChat.Instance.MessageReceived += OnChatMessageReceived;
+        // If SubscibeOnReady is false, you might need to call this:
+        // TwitchChat.Instance.Subscribe();
+    }
+
+    // Callback function for new messages
+    private async void OnChatMessageReceived(TwitchChatMessage chatMessage)
+    {
+        GD.Print($"[{chatMessage.BroadcasterUserName}] {chatMessage.ChatterUserName}: {chatMessage.Content.Text}");
+
+        // Example: Reply "Hello!" to any message containing "hi"
+        if (chatMessage.Content.Text.ToLower().Contains("hi"))
+        {
+            var responseData = await TwitchChat.Instance.SendMessage("Hello!", chatMessage.MessageId);
+            if (responseData.Length > 0 && responseData[0].IsSent)
+            {
+                GD.Print("Replied successfully!");
+            }
+            else
+            {
+                GD.PrintErr($"Failed to send reply. Reason: {(responseData.Length > 0 ? responseData[0].DropReason?.Message : "Unknown")}");
+            }
+        }
+    }
+
+    // Example: Send a message manually (e.g., triggered by a button press)
+    private async void SendTestMessage()
+    {
+        var responseData = await TwitchChat.Instance.SendMessage("This is a test message from Godot!");
+        if (responseData.Length > 0 && responseData[0].IsSent)
+        {
+            GD.Print("Test message sent successfully!");
+        }
+        else
+        {
+            GD.PrintErr($"Failed to send test message. Reason: {(responseData.Length > 0 ? responseData[0].DropReason?.Message : "Unknown")}");
+        }
+    }
+}
+```
+
+:::

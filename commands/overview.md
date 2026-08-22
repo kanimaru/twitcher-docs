@@ -7,6 +7,10 @@ their signals.
 All command nodes inherit from a common `TwitchCommandBase`, giving them a shared foundation for handling permissions,
 cooldowns, and location (chat/whisper).
 
+::: tip C# note
+Every command type below is available from C# too: each page has a GDScript/C# tab on its code examples. In C#, `TwitchCommandBase` is an abstract class with a `PermissionFlag`/`WhereFlag` enum and `CommandReceived`/`ReceivedInvalidCommand`/`InvalidPermission`/`Cooldown` events shared by all command types, same as in GDScript.
+:::
+
 ### Types of Command Nodes
 
 * **[TwitchCommand](twitch-command.md):** The standard, prefix-based command (e.g., `!hello`). This is the most common

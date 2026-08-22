@@ -1,14 +1,17 @@
-﻿# TwitchCommandRegex Node
+# TwitchCommandRegex Node
 
 The `TwitchCommandRegex` node provides a powerful way to detect and react to specific patterns in chat messages using
 regular expressions (regex). Unlike the standard `TwitchCommand`, it is not triggered by a command prefix like `!`, but
 by a match against its configured regex pattern anywhere in the message.
 
 <Badge type="warning" text="Performance Advisory" />
+<Badge type="tip" text="GDScript & C#" />
 
 Be mindful when using this node. Applying regular expressions to every single message in a busy chat can be
 computationally intensive. Use simple, efficient patterns and limit the number of active `TwitchCommandRegex` nodes to
 avoid performance issues.
+
+Every example on this page is available in both GDScript and C#: use the tabs on each code block to switch.
 
 ## Overview
 
@@ -52,6 +55,10 @@ user sentences.
       again. `0` for no cooldown.
     * **`Global Cooldown` (`float`)**: The time in seconds that *everyone* must wait after the command is triggered
       before it can be used again. `0` for no cooldown.
+
+::: tip C# note
+`TwitchCommandRegex` isn't a singleton in C#: bind it to the node you configured in the editor with `this.GetTwitcherNode<TwitchCommandRegex>("...")` (from `TwitcherSharp.Extensions`), the same pattern used elsewhere on this site.
+:::
 
 ## Signals
 
@@ -97,7 +104,9 @@ Let's create a regex command to detect when a user reports their level in a game
 
 **2. Connect via Script:**
 
-```gdscript
+::: code-group
+
+```gdscript [GDScript]
 extends Node
 
 @onready var level_reporter: TwitchCommandRegex = $TwitchCommandRegex
@@ -128,3 +137,50 @@ func _on_level_reporter_cooldown(from_username: String, info: TwitchCommandInfo,
 # Placeholder for your actual game logic
 func update_player_level_from_chat(username: String, level: int):
     print("  -> Updating game state for '%s' to level %d." % [username, level])
+```
+
+```csharp [C#]
+using Godot;
+using TwitcherSharp.Chat;
+using TwitcherSharp.Extensions;
+
+public partial class YourNode : Node
+{
+    private TwitchCommandRegex _levelReporter;
+
+    public override void _Ready()
+    {
+        _levelReporter = this.GetTwitcherNode<TwitchCommandRegex>("TwitchCommandRegex");
+
+        _levelReporter.CommandReceived += OnLevelReported;
+        _levelReporter.Cooldown += OnLevelReporterCooldown;
+        GD.Print("Level reporter regex command is active.");
+    }
+
+    // Called on a successful, off-cooldown match with correct permissions
+    private void OnLevelReported(string fromUsername, TwitchCommandInfo info, string[] args)
+    {
+        if (args.Length == 0) return;
+
+        string levelString = args[0];
+        int levelNumber = int.Parse(levelString);
+
+        GD.Print($"User '{fromUsername}' reported they are on level {levelNumber}!");
+        UpdatePlayerLevelFromChat(fromUsername, levelNumber);
+    }
+
+    // Called when a user tries to trigger the command while on cooldown
+    private void OnLevelReporterCooldown(string fromUsername, TwitchCommandInfo info, string[] args, float remainingS)
+    {
+        GD.Print($"User {fromUsername} tried to report their level too soon. Cooldown: {remainingS:F1} seconds left.");
+        // Optionally send a whisper or chat message to inform the user
+        // await TwitchChat.Instance.SendMessage($"@{fromUsername}, you can report your level again in {remainingS:F0} seconds.");
+    }
+
+    // Placeholder for your actual game logic
+    private void UpdatePlayerLevelFromChat(string username, int level)
+        => GD.Print($"  -> Updating game state for '{username}' to level {level}.");
+}
+```
+
+:::

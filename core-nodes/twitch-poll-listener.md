@@ -1,7 +1,9 @@
-﻿# TwitchPollListener Node
+# TwitchPollListener Node
 
 The `TwitchPollListener` is a specialized, high-level node that simplifies listening for and reacting to the entire 
 lifecycle of a Twitch Poll, from its creation to its conclusion.
+
+<Badge type="tip" text="GDScript & C#" /> Every example on this page is available in both GDScript and C#: use the tabs on each code block to switch.
 
 ## Overview
 
@@ -30,6 +32,10 @@ and react to the final results when the poll ends.
 *   **`Ensure Subscriptions On Ready` (`bool`)**: If `true` (default), the node will automatically call `_ensure_subscriptions()` when it enters the scene tree.
 *   **`Broadcaster` (`TwitchUser`)**: *Optional.* The `TwitchUser` resource for the channel whose polls you want to listen to. If left `null`, the node will attempt to fetch the currently authenticated user and use them as the broadcaster.
 
+::: tip C# note
+`TwitchPollListener` isn't a singleton in C# (there's no `.Instance`): bind it to the node you configured in the editor with `this.GetTwitcherNode<TwitchPollListener>("...")` (from `TwitcherSharp.Extensions`), the same pattern used by `TwitchEventListener` and `TwitchRedeemListener`.
+:::
+
 ## Signals
 
 This node provides signals for each key moment in a poll's lifecycle:
@@ -41,11 +47,19 @@ This node provides signals for each key moment in a poll's lifecycle:
 *   **`poll_archived(poll: TwitchPoll)`**: Emitted when a completed or terminated poll is removed from the screen in Twitch's UI.
 *   **`poll_json(poll_json: Dictionary)`**: A lower-level signal that emits the raw, unprocessed event data dictionary for any poll-related event. Useful for advanced cases or debugging.
 
+::: tip C# note
+Same names, PascalCase, as regular C# events: `PollBegin`, `PollProgress`, `PollCompleted`, `PollTerminated`, `PollArchived`, `PollJson` (all `Action<TwitchPoll>`, except `PollJson` which is `Action<Godot.Collections.Dictionary>` for the raw payload).
+:::
+
 ## Methods
 
 *   **`ensure_subscriptions() -> void`**
     *   Checks if the required EventSub subscriptions for polls (`begin`, `progress`, and `end`) exist for the configured broadcaster. If any are missing, it creates them.
     *   This is called automatically if `ensure_subscriptions_on_ready` is `true`.
+
+::: tip C# note
+`ensure_subscriptions()` → `listener.EnsureSubscriptions()`.
+:::
 
 ## Usage Example
 
@@ -59,7 +73,9 @@ This example demonstrates how to listen to a poll, display its title and choices
 
 **2. Connect via Script:**
 
-```gdscript
+::: code-group
+
+```gdscript [GDScript]
 extends Node
 
 # Reference the listener node configured in the editor
@@ -118,3 +134,92 @@ func _on_poll_terminated(poll: TwitchPoll):
     for choice in poll.choices:
         print("  - %s: %d votes" % [choice.title, choice.votes])
     print("---------------------------")
+```
+
+```csharp [C#]
+using Godot;
+using TwitcherSharp.Api.Generated.Polls;
+using TwitcherSharp.Extensions;
+using TwitcherSharp.Poll;
+
+public partial class YourNode : Node
+{
+    // Reference the listener node configured in the editor
+    private TwitchPollListener _pollListener;
+
+    public override void _Ready()
+    {
+        _pollListener = this.GetTwitcherNode<TwitchPollListener>("TwitchPollListener");
+
+        // Connect to the lifecycle signals you care about
+        _pollListener.PollBegin += OnPollBegin;
+        _pollListener.PollProgress += OnPollProgress;
+        _pollListener.PollCompleted += OnPollCompleted;
+        _pollListener.PollTerminated += OnPollTerminated;
+
+        GD.Print("Twitch Poll Listener is ready.");
+    }
+
+    // Called when a poll starts
+    private void OnPollBegin(TwitchPoll poll)
+    {
+        GD.Print("--- NEW POLL STARTED ---");
+        GD.Print($"Title: {poll.Title}");
+        GD.Print("Choices:");
+        foreach (var choice in poll.Choices)
+        {
+            GD.Print($"  - {choice.Title} (ID: {choice.Id})");
+        }
+        GD.Print("------------------------");
+    }
+
+    // Called each time a vote is cast
+    private void OnPollProgress(TwitchPoll poll)
+    {
+        GD.Print("--- POLL PROGRESSED ---");
+        GD.Print($"Updated Votes for '{poll.Title}':");
+        foreach (var choice in poll.Choices)
+        {
+            GD.Print($"  - {choice.Title}: {choice.Votes} votes");
+        }
+        GD.Print("-----------------------");
+    }
+
+    // Called when the poll timer runs out
+    private void OnPollCompleted(TwitchPoll poll)
+    {
+        GD.Print("--- POLL COMPLETED ---");
+        GD.Print($"Final results for '{poll.Title}':");
+        TwitchPoll.TwitchChoices winningChoice = null;
+        int maxVotes = -1;
+        foreach (var choice in poll.Choices)
+        {
+            GD.Print($"  - {choice.Title}: {choice.Votes} votes");
+            if (choice.Votes > maxVotes)
+            {
+                maxVotes = choice.Votes;
+                winningChoice = choice;
+            }
+        }
+        if (winningChoice != null)
+        {
+            GD.Print($"Winning choice: '{winningChoice.Title}' with {maxVotes} votes!");
+        }
+        GD.Print("----------------------");
+    }
+
+    // Called if the poll is ended early
+    private void OnPollTerminated(TwitchPoll poll)
+    {
+        GD.Print("--- POLL TERMINATED EARLY ---");
+        GD.Print($"Final results for '{poll.Title}':");
+        foreach (var choice in poll.Choices)
+        {
+            GD.Print($"  - {choice.Title}: {choice.Votes} votes");
+        }
+        GD.Print("---------------------------");
+    }
+}
+```
+
+:::

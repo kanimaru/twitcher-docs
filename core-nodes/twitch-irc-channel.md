@@ -10,6 +10,10 @@ The `TwitchIrcChannel` node provides a focused way to interact with a single, sp
 underlying `TwitchIRC` connection manager. It's primarily intended for scenarios where your application needs to connect 
 to and manage multiple Twitch channels concurrently.
 
+::: warning Not available in C#
+[TwitcherSharp](https://github.com/Temptica/TwitcherSharp) does not wrap `TwitchIrcChannel`, for the same reason it doesn't wrap `TwitchIRC`; see the note on the [TwitchIRC](/core-nodes/twitch-irc) page. Use `TwitchChat` and `TwitchEventListener` instead.
+:::
+
 ## Overview
 
 While the main `TwitchIRC` node handles the overall connection and receives events for *all* joined channels, 

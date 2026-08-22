@@ -25,6 +25,10 @@ This node acts as a self-contained help command handler. When a user invokes the
 
 This automates the process of providing users with information about your bot's or application's commands.
 
+::: tip C# note
+`TwitchCommandHelp` is available in C# too, as `TwitcherSharp.Chat.TwitchCommandHelp`: it extends `TwitchCommand` the same way as in GDScript, so it can be configured entirely from the editor exactly as described below with no C# code required, or built from code with an object initializer and registered via `TwitchService.Instance.AddCommand(...)`, the same way as a regular [`TwitchCommand`](/commands/twitch-command). Its extra properties are `SenderUser` and `CurrentUser` (both `TwitchUser`).
+:::
+
 ## Prerequisites
 
 1. **Add the Node:** Add a `TwitchCommandHelp` node to your scene.

@@ -1,6 +1,8 @@
-﻿# TwitchRedeemListener Node
+# TwitchRedeemListener Node
 
 The `TwitchRedeemListener` is a high-level node that simplifies listening to specific channel point redemptions from your viewers.
+
+<Badge type="tip" text="GDScript & C#" /> Every example on this page is available in both GDScript and C#: use the tabs on each code block to switch.
 
 ## Overview
 
@@ -36,12 +38,20 @@ This process abstracts away nearly all the boilerplate code, letting you focus d
     *   Emitted when a viewer redeems a channel point reward that is included in the `rewards_to_listen` array.
     *   `redemption`: A fully constructed `TwitchRedemption` object, ready for you to inspect, connect to, and act upon.
 
+::: tip C# note
+`TwitchRedeemListener` isn't a singleton in C# (there's no `.Instance`): bind it to the node you configured in the editor with `this.GetTwitcherNode<TwitchRedeemListener>("...")` (from `TwitcherSharp.Extensions`), the same pattern used by `TwitchEventListener`. `redeemed` becomes `listener.Redeemed += OnRewardRedeemed;`.
+:::
+
 ## Methods
 
 *   **`ensure_subscriptions() -> void`**
     *   Checks if the required EventSub subscriptions for redemptions (`add` and `update`) exist for the current user. If not, it creates them.
     *   This is called automatically if `ensure_subscriptions_on_ready` is `true`. You can call it manually if you need to re-verify or establish the subscriptions at a different time.
     *   **Note:** This is an `async` function.
+
+::: tip C# note
+`ensure_subscriptions()` → `listener.EnsureSubscription()`. Also available: `listener.AddReward(reward)` / `listener.RemoveReward(reward)` to change `RewardsToListen` at runtime, and `await listener.FullFillRedemption(redemptionId, reward, broadcasterId)` / `await listener.CancelRedemption(...)` for fulfilling/cancelling by ID directly through the listener instead of through a `TwitchRedemption` object.
+:::
 
 ## Usage Example
 
@@ -60,7 +70,9 @@ This process abstracts away nearly all the boilerplate code, letting you focus d
 
 **3. Connect via Script:**
 
-```gdscript
+::: code-group
+
+```gdscript [GDScript]
 extends Node
 
 # Reference the listener node configured in the editor
@@ -106,3 +118,68 @@ func _on_reward_redeemed(redemption: TwitchRedemption):
 # Placeholder for your actual game logic
 func spawn_monster(name: String):
     print("  -> Spawning a monster named '%s' into the game!" % name)
+```
+
+```csharp [C#]
+using Godot;
+using TwitcherSharp.Extensions;
+using TwitcherSharp.Reward;
+
+public partial class YourNode : Node
+{
+    // Reference the listener node configured in the editor
+    private TwitchRedeemListener _redeemListener;
+
+    public override void _Ready()
+    {
+        _redeemListener = this.GetTwitcherNode<TwitchRedeemListener>("TwitchRedeemListener");
+
+        // Connect to the listener's signal
+        _redeemListener.Redeemed += OnRewardRedeemed;
+        GD.Print("Ready to listen for specific reward redemptions!");
+    }
+
+    // This is called ONLY when a reward from 'RewardsToListen' is redeemed.
+    private void OnRewardRedeemed(TwitchRedemption redemption)
+    {
+        GD.Print($"'{redemption.Reward.Title}' was redeemed by '{redemption.User.DisplayName}'!");
+
+        // Connect to the redemption object's signals for confirmation callbacks
+        redemption.Fulfilled += () =>
+            GD.Print($"CONFIRMED: Redemption for '{redemption.Reward.Title}' was fulfilled.");
+
+        // Now, handle the game logic based on the reward
+        switch (redemption.Reward.Title)
+        {
+            // Better to check against the reward resource directly but for the example it's the title
+            case "Spawn a Monster":
+                // If the reward requires user input for the monster's name
+                var monsterName = string.IsNullOrEmpty(redemption.UserInput)
+                    ? $"{redemption.User.DisplayName}'s Monster"
+                    : redemption.UserInput;
+
+                SpawnMonster(monsterName);
+
+                // After the game action is complete, fulfill the redemption on Twitch
+                GD.Print("Fulfilling the redemption on Twitch...");
+                redemption.Fullfill();
+                break;
+
+            // Handle other configured rewards here...
+            default:
+                GD.Print($"Unhandled reward: {redemption.Reward.Title}. Canceling.");
+                redemption.Cancel();
+                break;
+        }
+    }
+
+    // Placeholder for your actual game logic
+    private void SpawnMonster(string name) => GD.Print($"  -> Spawning a monster named '{name}' into the game!");
+}
+```
+
+:::
+
+::: tip C# note
+`redemption.Fullfill()` / `redemption.Cancel()` are synchronous fire-and-forget calls in C# (they don't return a `Task`), unlike the `await`-able GDScript versions; use the `Fulfilled`/`Cancelled` signals shown above if you need to react once Twitch confirms the change.
+:::

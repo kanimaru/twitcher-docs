@@ -1,8 +1,10 @@
-﻿# TwitchMediaLoader Node
+# TwitchMediaLoader Node
 
 The `TwitchMediaLoader` node handles the fetching, caching, and loading of Twitch visual media assets, such as emotes, 
 badges, cheermotes, and user profile images, making them readily available for use in your Godot project as 
 `SpriteFrames` or `ImageTexture`.
+
+<Badge type="tip" text="GDScript & C#" /> Every example on this page is available in both GDScript and C#: use the tabs on each code block to switch.
 
 ## Overview
 
@@ -26,6 +28,10 @@ The goal is to efficiently manage these assets, reducing redundant downloads and
 2.  **API Dependency:** Assign a configured `TwitchAPI` instance to the `Api` property in the Inspector. When you just have one `TwitchAPI` node in your scene it will assign it automatically.
 3.  **Image Transformer:** Ensure the `Image Transformer` property is assigned, especially if you need support for animated emotes or cheermotes use `NativeImageTransformer` or `MagicImageTransformer` see also [TwitchMediaLoader](twitch-media-loader.md)
 
+::: tip C# note
+In C#, `TwitchMediaLoader` follows the same `.Instance` / `.CreateInstance()` singleton pattern as `TwitchService` and `TwitchAPI`; see [TwitchService](/core-nodes/twitch-service) for details.
+:::
+
 ## Configuration (Inspector Properties)
 
 *   **`Api` (`TwitchAPI`)**: **Required.** The `TwitchAPI` instance used to fetch metadata about emotes, badges, etc.
@@ -41,6 +47,10 @@ The goal is to efficiently manage these assets, reducing redundant downloads and
 
 *   **`emoji_loaded(definition: TwitchEmoteDefinition)`**
     *   Emitted after an emote corresponding to the given `TwitchEmoteDefinition` has been successfully downloaded, converted, and cached. This signals that the `SpriteFrames` resource is now available via `ResourceLoader` or subsequent `get_emotes*` calls.
+
+::: tip C# note
+In C#: `TwitchMediaLoader.Instance.EmojiLoaded += OnEmojiLoaded;`
+:::
 
 ## Key Public Methods
 
@@ -95,6 +105,10 @@ The goal is to efficiently manage these assets, reducing redundant downloads and
 *   **`load_image(url: String) -> Image`**
     *   A generic function to download an image from any URL and return it as a Godot `Image` object. Primarily for internal use or custom needs.
 
+::: tip C# note
+Method names carry over 1:1 in PascalCase (`PreloadEmotes`, `GetCachedEmotes`, `GetEmotes`, `GetEmotesByDefinition`, `PreloadBadges`, `GetBadges`, `AllCheermotes`, `GetCheerInfo`, `FindCheerTier`, `GetCheermotes`, `LoadProfileImage`, `LoadImage`), with one difference worth noting: `GetEmotes(string[] emoteIds)` and `GetEmotesByDefinition(...)` are **synchronous** in C#: they return the `Dictionary` directly, not wrapped in a `Task`, so don't `await` them. Everything else that touches the network (`PreloadEmotes`, `PreloadBadges`, `GetCachedEmotes`, `GetBadges`, `GetCheerInfo`, `GetCheermotes`, `LoadProfileImage`, `LoadImage`) is still `async Task<T>` as expected.
+:::
+
 ## Caching Behavior
 
 `TwitchMediaLoader` employs a multi-level caching strategy:
@@ -107,7 +121,9 @@ This ensures that assets are downloaded only once and subsequent loads are signi
 
 ## Usage Example
 
-```gdscript
+::: code-group
+
+```gdscript [GDScript]
 extends Node
 
 @onready var media_loader: TwitchMediaLoader = $Path/To/MediaLoader
@@ -142,3 +158,54 @@ func load_user_profile(user: TwitchUser):
     profile_pic.texture = profile_texture
     print("Profile image loaded.")
 ```
+
+```csharp [C#]
+using Godot;
+using TwitcherSharp;
+using TwitcherSharp.Api.Generated.Users;
+using TwitcherSharp.Media;
+
+public partial class YourNode : Node
+{
+    [Export] private AnimatedSprite2D _emoteDisplay;
+    [Export] private TextureRect _profilePic;
+
+    public override async void _Ready()
+    {
+        // Example: Load a specific emote by ID
+        LoadSpecificEmote("301544920"); // Example KappaRoss emote ID
+
+        // Example: Load current user's profile picture (assuming TwitchService exists)
+        var currentUser = await TwitchService.Instance.GetCurrentUser();
+        await LoadUserProfile(currentUser);
+    }
+
+    private void LoadSpecificEmote(string emoteId)
+    {
+        GD.Print($"Requesting emote ID: {emoteId}");
+        // GetEmotes is synchronous in C#, no await needed
+        var emoteDict = TwitchMediaLoader.Instance.GetEmotes([emoteId]);
+
+        if (emoteDict.TryGetValue(emoteId, out var spriteFrames))
+        {
+            _emoteDisplay.SpriteFrames = spriteFrames;
+            _emoteDisplay.Play("default");
+            GD.Print("Emote loaded successfully.");
+        }
+        else
+        {
+            GD.PrintErr($"Failed to load emote ID: {emoteId}");
+        }
+    }
+
+    private async Task LoadUserProfile(TwitchUser user)
+    {
+        GD.Print($"Loading profile for: {user.DisplayName}");
+        var profileTexture = await TwitchMediaLoader.Instance.LoadProfileImage(user);
+        _profilePic.Texture = profileTexture;
+        GD.Print("Profile image loaded.");
+    }
+}
+```
+
+:::
