@@ -147,6 +147,7 @@ func send_test_chat_message(message_text: String):
 
 ```csharp [C#]
 using Godot;
+using System.Threading.Tasks;
 using TwitcherSharp.Api.Generated;
 using TwitcherSharp.Api.Generated.Chat;
 using TwitcherSharp.Api.Generated.Users;

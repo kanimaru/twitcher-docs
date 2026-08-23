@@ -66,8 +66,9 @@ while (response != null)
         GD.Print($"Subscriber: {subscriberData.UserName} (User ID: {subscriberData.UserId})");
     }
 
-    // 4. Fetch the next page, if any. Pagination is null once there are no more pages.
-    response = response.Pagination != null ? await response.NextPage() : null;
+    // 4. Fetch the next page, if any. On the last page, Pagination is still
+    //    present but its Cursor is null/empty, so check the cursor, not the object.
+    response = !string.IsNullOrEmpty(response.Pagination?.Cursor) ? await response.NextPage() : null;
 }
 
 GD.Print("Finished fetching all subscribers.");
@@ -76,5 +77,5 @@ GD.Print("Finished fetching all subscribers.");
 :::
 
 ::: tip C# note
-C# doesn't use GDScript's custom iterator/"promise" protocol for pagination. Instead, every paginated `...Response` class exposes `Data` (the current page's items, ready to use immediately) plus `Pagination` (`null` once you're on the last page) and `async Task<TResponse> NextPage()` to fetch the next page: a plain `while` loop instead of a `for...in` over promises.
+C# doesn't use GDScript's custom iterator/"promise" protocol for pagination. Instead, every paginated `...Response` class exposes `Data` (the current page's items, ready to use immediately) plus `Pagination` and `async Task<TResponse> NextPage()` to fetch the next page: a plain `while` loop instead of a `for...in` over promises. Note that `Pagination` itself stays non-null on the last page — Twitch returns an empty `pagination: {}` object — so check `Pagination?.Cursor` for `null`/empty instead of checking `Pagination` for `null`, or `NextPage()` will loop back to page 1 forever.
 :::

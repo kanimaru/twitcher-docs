@@ -55,7 +55,7 @@ package on top of the addon you just installed. If you're staying in GDScript, s
 [Editor Configuration](#editor-configuration).
 
 1.  **Confirm requirements:**
-    *   Godot 4.6+ with C# support enabled (the .NET build of Godot).
+    *   Godot 4.7+ with C# support enabled (the .NET build of Godot).
     *   [.NET SDK 10.0+](https://dotnet.microsoft.com/download) installed.
     *   Twitcher itself already installed at `res://addons/twitcher/` (the previous step).
 

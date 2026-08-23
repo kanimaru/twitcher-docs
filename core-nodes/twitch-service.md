@@ -59,6 +59,7 @@ func get_self_info():
 
 ```csharp [C#]
 using Godot;
+using System.Threading.Tasks;
 using TwitcherSharp;
 
 public partial class YourNode : Node
@@ -125,6 +126,8 @@ func _get_user_details(username: String) -> void:
 ```
 
 ```csharp [C#]
+[Export] private Sprite2D _yourSprite2D;
+
 private async Task GetUserDetails(string username)
 {
     // Get user info by login name
@@ -137,7 +140,7 @@ private async Task GetUserDetails(string username)
         var profileTexture = await TwitchService.Instance.GetProfileImage(user);
         if (profileTexture != null)
         {
-            YourSprite2D.Texture = profileTexture; // Assign to a Sprite2D, TextureRect etc.
+            _yourSprite2D.Texture = profileTexture; // Assign to a Sprite2D, TextureRect etc.
         }
     }
     else
@@ -190,11 +193,15 @@ func _ready():
 
 # Callback function for the command
 func _on_hello_command(from_username: String, info: TwitchCommandInfo, args: PackedStringArray):
-    print("Received !hello command from %s" % info.user_display_name)
-    TwitchService.chat("Hi there, %s!" % info.user_display_name)
+    print("Received !hello command from %s" % info.username)
+    TwitchService.chat("Hi there, %s!" % info.username)
 ```
 
 ```csharp [C#]
+using TwitcherSharp.Chat;
+
+private TwitchCommand _helloCommand;
+
 public override async void _Ready()
 {
     // Wait for setup first...
@@ -202,8 +209,8 @@ public override async void _Ready()
     if (setupSuccessful)
     {
         // Add a command handler for "!hello"
-        TwitchService.Instance.AddCommand("hello",
-            Callable.From<string, TwitchCommandInfo, string[]>(OnHelloCommand));
+        _helloCommand = TwitchService.Instance.AddCommand(new TwitchCommand { Command = "hello" });
+        _helloCommand.CommandReceived += OnHelloCommand;
         GD.Print("Registered !hello command.");
     }
     else
@@ -223,7 +230,7 @@ private void OnHelloCommand(string fromUsername, TwitchCommandInfo info, string[
 :::
 
 ::: tip C# note
-`AddCommand` also has an overload that takes a `TwitchCommand` object directly (`TwitchService.Instance.AddCommand(command)`), which is generally the more idiomatic way to register commands from C#; see the [Commands](/commands/overview) section for details and a `CommandReceived` event example.
+In C#, use the `AddCommand(TwitchCommand)` overload and subscribe to the returned command's `CommandReceived` event, as shown above. The `AddCommand(string, Callable)` overload (mirroring the GDScript `add_command` call) passes the callable straight through to GDScript and cannot marshal the native `TwitchCommandInfo` into the C# wrapper type, so it will fail at runtime for C# consumers — avoid it. See the [Commands](/commands/overview) section for more details.
 :::
 
 ### Subscribing to Events (EventSub)
@@ -246,12 +253,12 @@ func subscribe_to_follows():
 
     # Now, connect to the signal on the TwitchEventsub node itself
     # to receive the actual event notifications.
-    TwitchService.instance.eventsub.event_received.connect(_on_eventsub_event)
+    TwitchService.instance.eventsub.event.connect(_on_eventsub_event)
 
 
-func _on_eventsub_event(event_data: Dictionary):
-    if event_data.subscription.type == "channel.follow":
-        var follower_name = event_data.user_name
+func _on_eventsub_event(type: StringName, data: Dictionary):
+    if type == "channel.follow":
+        var follower_name = data.user_name
         print("New follower: %s!" % follower_name)
 ```
 

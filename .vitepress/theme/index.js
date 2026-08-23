@@ -52,7 +52,12 @@ function currentLang() {
 
 export default {
   extends: DefaultTheme,
-  enhanceApp({ app }) {
+  // onContentUpdated registers an onUnmounted hook internally, which needs an
+  // active component instance to attach to — enhanceApp() itself runs
+  // outside of any component's setup(), so calling it there makes Vue warn
+  // on every page load. VitePress calls Theme.setup() from inside its own
+  // root component's setup(), so register it here instead.
+  setup() {
     if (!inBrowser) return
 
     // Re-apply the saved preference whenever the page content changes
@@ -71,6 +76,9 @@ export default {
       // dev-mode reset within it) regardless of tab visibility.
       setTimeout(() => applyLang(lang), 0)
     })
+  },
+  enhanceApp({ app }) {
+    if (!inBrowser) return
 
     // Capture the click before VitePress's own per-group toggle handler runs,
     // so we can broadcast the choice to every code-group on the page instead

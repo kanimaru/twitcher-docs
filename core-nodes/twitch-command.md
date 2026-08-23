@@ -129,6 +129,7 @@ func _on_dice_cooldown(from_username: String, info: TwitchCommandInfo, args: Pac
 ```
 
 ```csharp [C#]
+using System;
 using Godot;
 using TwitcherSharp;
 using TwitcherSharp.Chat;

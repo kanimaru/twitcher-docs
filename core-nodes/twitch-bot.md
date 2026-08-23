@@ -90,6 +90,7 @@ func send_bot_greeting():
 
 ```csharp [C#]
 using Godot;
+using System.Threading.Tasks;
 using TwitcherSharp.Chat;
 
 public partial class YourNode : Node

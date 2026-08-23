@@ -49,7 +49,7 @@ In C#, `TwitchMediaLoader` follows the same `.Instance` / `.CreateInstance()` si
     *   Emitted after an emote corresponding to the given `TwitchEmoteDefinition` has been successfully downloaded, converted, and cached. This signals that the `SpriteFrames` resource is now available via `ResourceLoader` or subsequent `get_emotes*` calls.
 
 ::: tip C# note
-In C#: `TwitchMediaLoader.Instance.EmojiLoaded += OnEmojiLoaded;`
+In C#: `TwitchMediaLoader.Instance.EmojiLoaded += OnEmojiLoaded;`. Unlike the GDScript `emoji_loaded(definition: TwitchEmoteDefinition)` signal, the C# `EmojiLoaded` event carries **no parameters** (`void OnEmojiLoaded()`) — it only tells you *that* an emote finished loading, not which one. If you need to know which emote, track it yourself around the `GetEmotes`/`GetEmotesByDefinition` call that triggered the load.
 :::
 
 ## Key Public Methods
@@ -106,7 +106,7 @@ In C#: `TwitchMediaLoader.Instance.EmojiLoaded += OnEmojiLoaded;`
     *   A generic function to download an image from any URL and return it as a Godot `Image` object. Primarily for internal use or custom needs.
 
 ::: tip C# note
-Method names carry over 1:1 in PascalCase (`PreloadEmotes`, `GetCachedEmotes`, `GetEmotes`, `GetEmotesByDefinition`, `PreloadBadges`, `GetBadges`, `AllCheermotes`, `GetCheerInfo`, `FindCheerTier`, `GetCheermotes`, `LoadProfileImage`, `LoadImage`), with one difference worth noting: `GetEmotes(string[] emoteIds)` and `GetEmotesByDefinition(...)` are **synchronous** in C#: they return the `Dictionary` directly, not wrapped in a `Task`, so don't `await` them. Everything else that touches the network (`PreloadEmotes`, `PreloadBadges`, `GetCachedEmotes`, `GetBadges`, `GetCheerInfo`, `GetCheermotes`, `LoadProfileImage`, `LoadImage`) is still `async Task<T>` as expected.
+Method names carry over 1:1 in PascalCase (`PreloadEmotes`, `GetCachedEmotes`, `GetEmotes`, `GetEmotesByDefinition`, `PreloadBadges`, `GetBadges`, `AllCheermotes`, `GetCheerInfo`, `FindCheerTier`, `GetCheermotes`, `LoadProfileImage`, `LoadImage`), with a couple of differences worth noting: `GetEmotes(string[] emoteIds)` and `GetEmotesByDefinition(...)` are **synchronous** in C#: they return the `Dictionary` directly, not wrapped in a `Task`, so don't `await` them. `PreloadEmotes` is also synchronous (`void`, not `Task`) — only `PreloadBadges` and the other network-touching calls (`GetCachedEmotes`, `GetBadges`, `GetCheerInfo`, `GetCheermotes`, `LoadProfileImage`, `LoadImage`) are still `async Task<T>`/`async Task` as expected.
 :::
 
 ## Caching Behavior
@@ -161,6 +161,7 @@ func load_user_profile(user: TwitchUser):
 
 ```csharp [C#]
 using Godot;
+using System.Threading.Tasks;
 using TwitcherSharp;
 using TwitcherSharp.Api.Generated.Users;
 using TwitcherSharp.Media;

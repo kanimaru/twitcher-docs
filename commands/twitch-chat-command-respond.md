@@ -62,7 +62,7 @@ The command is now live. Any user can type `!socials` in chat (once every 30 sec
 automatically reply with your configured message. No GDScript connections are needed for this simple case.
 
 ::: tip C# note
-The C# class for this node is named `TwitchChatCommandResponse` (note: *Response*, not *Respond*), in `TwitcherSharp.Chat`. Unlike the other command types on this site, it's a thin wrapper: it only exposes `ResponseMessage` (`string`) and `UseBot` (`bool`, defaults to `true`), not the full set of inherited `TwitchCommand` properties (`Command`, `Aliases`, `PermissionLevel`, etc.). Since this node is meant to be configured without code anyway, that's rarely a problem in practice; set `Command`, `Description`, cooldowns, and so on in the editor as described above, and only reach for `TwitchChatCommandResponse.FromObject(...)` from C# if you need to read or change the `Response` text or `UseBot` flag at runtime.
+The C# class for this node is named `TwitchChatCommandResponse` (note: *Response*, not *Respond*), in `TwitcherSharp.Chat`. Unlike the other command types on this site, it's a thin wrapper: it only exposes `ResponseMessage` (`string`) and `UseBot` (`bool`, defaults to `true`), not the full set of inherited `TwitchCommand` properties (`Command`, `Aliases`, `PermissionLevel`, etc.). Since this node is meant to be configured without code anyway, that's rarely a problem in practice; set `Command`, `Description`, cooldowns, and so on in the editor as described above, and only reach for `TwitchChatCommandResponse.FromObject(...)` from C# if you need to read or change the `ResponseMessage` text or `UseBot` flag at runtime.
 :::
 
 ## Key Considerations
