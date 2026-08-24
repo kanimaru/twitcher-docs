@@ -263,6 +263,7 @@ func _on_eventsub_event(type: StringName, data: Dictionary):
 ```
 
 ```csharp [C#]
+using System.Threading.Tasks;
 using TwitcherSharp.EventSub;
 using TwitcherSharp.EventSub.Generated.ChannelFollow;
 
