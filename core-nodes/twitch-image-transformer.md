@@ -6,6 +6,10 @@ Godot-usable `SpriteFrames`. This is crucial for handling different image format
 
 Twitcher includes three built-in transformer implementations, each with different capabilities and trade-offs:
 
+::: tip C# note
+`TwitchMediaLoader.ImageTransformer` is typed as the base `TwitchImageTransformer` class in C#, regardless of which of the three implementations below is actually assigned. Choosing between `TwitchImageTransformer`, `NativeImageTransformer`, and `MagicImageTransformer` is purely an editor-side decision: drag the `.tres` resource you want onto `Image Transformer` in the Inspector as described here; your C# code doesn't need to know or care which one is behind it.
+:::
+
 ---
 
 ### 1. `TwitchImageTransformer` (Static Only)

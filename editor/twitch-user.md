@@ -5,9 +5,22 @@ It helps you to convert the UserNames to User IDs with the help of the TwitchAPI
 For convenience purpose, it converts the Username directly to a `TwitchUser` Resource and you can use it where ever you want.
 
 Example:
-```gdscript
+
+::: code-group
+
+```gdscript [GDScript]
 @export var user: TwitchUser 
 ```
+
+```csharp [C#]
+[Export] public TwitchUser User { get; set; }
+```
+
+:::
+
+::: tip C# note
+The editor tooling on this page (the inspector, the authorize/convert buttons, the screenshots below) works identically no matter which language your scripts are in; it's driven by the exported `TwitchUser` property itself, not by GDScript or C#.
+:::
 
 It looks like this when authorized:
 ![editor-user-inspector-1.gif](/editor-user-inspector-1.gif)

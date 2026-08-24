@@ -1,7 +1,9 @@
-﻿# TwitchBot Node
+# TwitchBot Node
 
 The `TwitchBot` node provides a way to send chat messages as a designated bot account, separate from your main authenticated user. 
 This is the mechanism required to have messages appear in Twitch chat with the official **Bot** badge next to the username.
+
+<Badge type="tip" text="GDScript & C#" /> Every example on this page is available in both GDScript and C#: use the tabs on each code block to switch.
 
 ## Overview
 
@@ -59,9 +61,15 @@ This node does not introduce new public signals for general use.
     *   `broadcaster`: *Optional.* A `TwitchUser` object for the target channel. If `null`, it defaults to the `Receiver` property, which in turn defaults to the `Sender` property.
     *   **Note:** This method is `async`. You can call it with `await` to wait until the message was sent. It will automatically handle authorizing the `bot_token` if it's not already authenticated.
 
+::: tip C# note
+In C#, `TwitchBot`'s messaging methods are exposed as **static** methods on the `TwitchBot` class rather than instance methods: `TwitchBot.SendMessage(...)`, `TwitchBot.SendLongMessage(...)` (auto-splits messages over 500 characters into multiple sends), `TwitchBot.Announcement(...)` and `TwitchBot.Shoutout(fromUser, targetUser)`. They operate against `TwitchBot.Instance` internally, so you still need the node in the scene (or created via `TwitchBot.CreateInstance()`); you just don't have to fetch the instance yourself to call them.
+:::
+
 ## Usage Example
 
-```gdscript
+::: code-group
+
+```gdscript [GDScript]
 extends Node
 
 # Assuming TwitchBot node is configured in the scene
@@ -79,6 +87,31 @@ func send_bot_greeting():
     await twitch_bot.send_message("Hello! I am a bot user powered by Twitcher.")
     print("Bot message sent (or at least attempted).")
 ```
+
+```csharp [C#]
+using Godot;
+using System.Threading.Tasks;
+using TwitcherSharp.Chat;
+
+public partial class YourNode : Node
+{
+    public override async void _Ready()
+    {
+        // Example: send a message after a short delay
+        await ToSignal(GetTree().CreateTimer(5.0), SceneTreeTimer.SignalName.Timeout);
+        await SendBotGreeting();
+    }
+
+    private async Task SendBotGreeting()
+    {
+        GD.Print($"Sending greeting from bot '{TwitchBot.Instance.Sender.DisplayName}' to channel '{TwitchBot.Instance.Receiver.DisplayName}'");
+        await TwitchBot.SendMessage("Hello! I am a bot user powered by TwitcherSharp.");
+        GD.Print("Bot message sent (or at least attempted).");
+    }
+}
+```
+
+:::
 
 ## Considerations
  * Complex Permissions: The `user:bot` and `channel:bot` scope requirements are strict. This feature is advanced and requires careful setup on the Twitch developer side for multiple user accounts.

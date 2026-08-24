@@ -26,10 +26,20 @@ The most common way to authorize the editor is during the initial configuration 
 If you haven't authorized the editor via the initial setup, or if the editor's token expires, you can re-authorize when working with `TwitchUser` resources:
 
 *   Create or assign a `TwitchUser` resource to an exported variable in one of your scripts:
-    ```gdscript
+
+    ::: code-group
+
+    ```gdscript [GDScript]
     # Example script variable
     @export var user: TwitchUser
     ```
+
+    ```csharp [C#]
+    // Example script variable
+    [Export] public TwitchUser User { get; set; }
+    ```
+
+    :::
 *   Select the node with this script in the Scene dock.
 *   In the Inspector, find the `user` property. If the editor is not authorized, you will likely see an **`Authorize Editor`** button directly within the inspector for the `TwitchUser` resource.
     ![Authorize Editor button within the TwitchUser inspector](/editor-user-inspector-2.png) _(Caption: Authorize Editor button in TwitchUser inspector)_

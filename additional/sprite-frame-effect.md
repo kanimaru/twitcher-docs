@@ -27,7 +27,11 @@ Integrating this effect involves two main steps: installing the effect and prepa
 
 ## Example
 
-```gdscript
+<Badge type="tip" text="GDScript & C#" />
+
+::: code-group
+
+```gdscript [GDScript]
 extends Control
 
 # Assign your SpriteFrames resource in the Inspector or load it here.
@@ -52,6 +56,40 @@ func _ready() -> void:
     # 3. Set the prepared text on the RichTextLabel.
     rich_text_label.text = prepared_message
 ```
+
+```csharp [C#]
+using Godot;
+using TwitcherSharp.Extensions;
+
+public partial class YourNode : Control
+{
+    [Export] public SpriteFrames AnimatedEmote;
+
+    private RichTextLabel _richTextLabel;
+
+    public override void _Ready()
+    {
+        _richTextLabel = GetNode<RichTextLabel>("RichTextLabel");
+
+        // Define the text including the custom sprite tag.
+        // Use '.ResourcePath' to get the loadable path for the SpriteFrames.
+        string originalMessage = $"Here is an animated emote: [sprite id='emote_1']{AnimatedEmote.ResourcePath}[/sprite] Cool!";
+
+        // 1 & 2. PrepareSpriteFrameMessage creates the SpriteFrameEffect, installs
+        // it on the label, and prepares the message in one call.
+        string preparedMessage = _richTextLabel.PrepareSpriteFrameMessage(originalMessage);
+
+        // 3. Set the prepared text on the RichTextLabel.
+        _richTextLabel.Text = preparedMessage;
+    }
+}
+```
+
+:::
+
+::: tip C# note
+`SpriteFrameEffect` doesn't have a dedicated wrapper class, but TwitcherSharp exposes it as an extension method on `RichTextLabel` instead: `richTextLabel.PrepareSpriteFrameMessage(message)` (from `TwitcherSharp.Extensions`) creates the effect, installs it on the label, and prepares the message in a single call; no need to touch `SpriteFrameEffect` or `install_effect` yourself.
+:::
 
 ## Implementation Details (How it Works Internally)
 

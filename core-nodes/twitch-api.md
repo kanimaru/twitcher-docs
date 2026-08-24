@@ -1,4 +1,4 @@
-﻿# TwitchAPI Node
+# TwitchAPI Node
 
 `TwitchAPI` serves as the primary interface for interacting with the Twitch Helix REST API endpoints.
 It manages authentication by adding the necessary `Authorization` (Bearer token) and `Client-ID` headers to requests,
@@ -14,6 +14,8 @@ to regenerate the API is located in `TwitchAPIParser` and `TwitchAPIGenerator`. 
 a proper Swagger, Twitcher uses the work of https://twitch-api-swagger.surge.sh/ credits goes to
 [DmitryScaletta](https://github.com/DmitryScaletta) for his awesome work to provide this technical documentation of
 the Twitch API.
+
+<Badge type="tip" text="GDScript & C#" /> Every example on this page is available in both GDScript and C#: use the tabs on each code block to switch.
 
 ## Overview
 
@@ -36,6 +38,10 @@ This node acts as a gateway to the Twitch API. Its main responsibilities include
 2.  **Token Resource:** Assign a configured and valid `OAuthToken` resource to the `Token` property. This token must have the necessary scopes granted for the API calls you intend to make.
 3.  **OAuth Settings Resource:** Assign a configured `OAuthSetting` resource (containing your Client ID) to the `Oauth Setting` property.
 
+::: tip C# note
+In C#, `$Path/To/TwitchAPI` from GDScript becomes the static property `TwitchApi.Instance`: it finds the first `TwitchAPI` node in the scene automatically, or use `TwitchApi.CreateInstance()` to add one at the scene root from code. This works the same way as `TwitchService.Instance` described on the [TwitchService](/core-nodes/twitch-service) page.
+:::
+
 ## Configuration (Inspector Properties)
 
 *   **`Token` (`OAuthToken`)**: **Required.** The `OAuthToken` resource that provides the access token used for the `Authorization: Bearer` header. This node relies on the token resource's ability to refresh itself when needed (signaled via `token.authorized`).
@@ -51,6 +57,10 @@ This node acts as a gateway to the Twitch API. Its main responsibilities include
 *   **`unauthorized`**
     *   Emitted when the API returns a `401 Unauthorized` status code. This usually means the access token is valid 
         but lacks the required OAuth scope(s) for the requested API endpoint.
+
+::: tip C# note
+In C#, these are exposed as regular events: `TwitchApi.Instance.Unauthenticated += OnUnauthenticated;` and `TwitchApi.Instance.Unauthorized += OnUnauthorized;`.
+:::
 
 ## Key Public Methods
 
@@ -71,13 +81,18 @@ This node acts as a gateway to the Twitch API. Its main responsibilities include
         method with the correct path, method, body, and content type. **Consult the documentation or implementation for 
         these specific wrapper methods when interacting with standard Twitch API features.**
 
+::: tip C# note
+In C#, `request()` becomes `TwitchApi.Instance.Request(path, method, body, contentType, errorCount)` and returns a `TwitcherSharp.Lib.Http.ResponseData` object (`.ResponseCode`, `.Error`, `.RawResponseData`, ...). Every endpoint wrapper is a strongly-typed method on `TwitchApi`, e.g. `Task<TwitchGetUsersResponse> GetUsers(TwitchGetUsersOpt opt = null)` or `Task<TwitchSendChatMessageResponse> SendChatMessage(TwitchSendChatMessageBody body)`, matching the naming and members of their GDScript counterparts, just PascalCase.
+:::
 
 ## Usage Example (Using Wrapper Method `send_chat_message`)
 
 This example demonstrates how to send a chat message using the dedicated `send_chat_message` wrapper method. 
 For actually sending a chat message please use `TwitchChat.send_message` or `TwitchService.chat`.
 
-```gdscript
+::: code-group
+
+```gdscript [GDScript]
 extends Node
 
 @onready var twitch_api: TwitchAPI = $Path/To/TwitchAPI
@@ -128,5 +143,78 @@ func send_test_chat_message(message_text: String):
 # Example of how to call this function:
 # func _on_SendButton_pressed():
 #     send_test_chat_message("Hello from Godot via TwitchAPI!")
+```
 
-    
+```csharp [C#]
+using Godot;
+using System.Threading.Tasks;
+using TwitcherSharp.Api.Generated;
+using TwitcherSharp.Api.Generated.Chat;
+using TwitcherSharp.Api.Generated.Users;
+
+public partial class YourNode : Node
+{
+    private async Task SendTestChatMessage(string messageText)
+    {
+        // Get the authenticated user's info (requires API call itself)
+        var userResponse = await TwitchApi.Instance.GetUsers(new TwitchGetUsersOpt());
+        if (userResponse.Data.Length == 0)
+        {
+            GD.PrintErr("Could not get current user info to send message.");
+            return;
+        }
+
+        TwitchUser currentUser = userResponse.Data[0];
+        string userId = currentUser.Id;
+
+        // --- Create the request body object ---
+        var messageBody = new TwitchSendChatMessageBody
+        {
+            BroadcasterId = userId,
+            SenderId = userId,
+            Message = messageText,
+        };
+
+        // --- Call the wrapper method ---
+        TwitchSendChatMessageResponse sendResponse = await TwitchApi.Instance.SendChatMessage(messageBody);
+
+        // --- Process the typed response ---
+        if (sendResponse.Data.Length == 0)
+        {
+            GD.PrintErr("Failed to send chat message! Response data is empty (unexpected).");
+        }
+        else
+        {
+            // Process the specific response data from TwitchSendChatMessageResponse.TwitchResponseData
+            var resultData = sendResponse.Data[0];
+            if (resultData.IsSent)
+            {
+                GD.Print("Chat message sent successfully!");
+            }
+            else
+            {
+                // Twitch provides reasons if a message is dropped (e.g., AutoMod)
+                GD.PrintErr("Chat message was dropped by Twitch.");
+                if (resultData.DropReason != null)
+                {
+                    GD.PrintErr($"  Reason Code: {resultData.DropReason.Code}");
+                    GD.PrintErr($"  Reason Message: {resultData.DropReason.Message}");
+                }
+                else
+                {
+                    GD.PrintErr("  No specific drop reason provided.");
+                }
+            }
+        }
+    }
+
+    // Example of how to call this function:
+    // private async void OnSendButtonPressed() => await SendTestChatMessage("Hello from Godot via TwitchAPI!");
+}
+```
+
+:::
+
+::: tip C# note
+Unlike the GDScript example, C# response objects only expose the `Data` array; there's no embedded `.Response.Error`/`.ResponseCode` on the typed wrapper responses. If you need the raw HTTP status code or error body for a wrapper call, drop down to `TwitchApi.Instance.Request(...)` directly instead, which returns the full `ResponseData` (`.Error`, `.ResponseCode`, `.RawResponseData`, ...).
+:::

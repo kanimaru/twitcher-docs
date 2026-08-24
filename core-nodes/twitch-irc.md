@@ -10,6 +10,10 @@ when updating existing ones. Relying on `TwitchIRC` may lead to broken functiona
 `TwitchIRC` provides connectivity to Twitch's chat servers using the traditional IRC protocol over WebSockets. 
 It allows sending messages and receiving a wide range of IRC events.
 
+::: warning Not available in C#
+[TwitcherSharp](https://github.com/Temptica/TwitcherSharp) does not wrap `TwitchIRC`; given the deprecation warning above, there's little reason to add a C# binding for it now. If you're on C#, use `TwitchChat` and `TwitchEventListener` instead, both of which are fully available (see [TwitchChat](/core-nodes/twitch-chat) and [TwitchEventListener](/core-nodes/twitch-event-listener)).
+:::
+
 ## Overview
 
 This node manages the WebSocket connection to Twitch IRC, handles the `PASS`/`NICK`/`CAP` handshake for authentication 

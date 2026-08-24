@@ -7,6 +7,10 @@ building upon Godot's built-in `WebSocketPeer`. Its main enhancement is the addi
 
 This node wraps a `WebSocketPeer` instance and manages its connection lifecycle. Key features include:
 
+::: warning Not available in C#
+[TwitcherSharp](https://github.com/Temptica/TwitcherSharp) doesn't wrap `WebsocketClient` as a standalone C# class; it's used internally by `TwitchEventSub` (see [Subscribing to Events (EventSub)](/core-nodes/twitch-service#subscribing-to-events-eventsub)) for the EventSub WebSocket connection, but there's no general-purpose binding for using it directly from your own C# code. If you need your own WebSocket connection outside of what `TwitchEventSub` already gives you, use Godot's `WebSocketPeer` directly (the same class this node builds on), or `System.Net.WebSockets.ClientWebSocket` from .NET.
+:::
+
 1.  **Connection Management:** Handles connecting to a specified `connection_url`.
 2.  **Automatic Reconnection:** If the `auto_reconnect` property is `true`, the client will automatically attempt to 
     reconnect if the connection is closed unexpectedly. It uses an exponential backoff strategy (increasing delays between attempts) 

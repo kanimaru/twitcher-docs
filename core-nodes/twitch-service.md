@@ -1,8 +1,9 @@
-﻿# Using TwitchService
+# Using TwitchService
 
 `TwitchService` is the central hub for interacting with Twitch. It acts as a high-level interface, simplifying common 
 tasks by coordinating the underlying components like `TwitchAPI`, `TwitchIRC`, `TwitchEventsub`, and `TwitchAuth`.
 
+<Badge type="tip" text="GDScript & C#" /> Every example on this page is available in both GDScript and C#: use the tabs on each code block to switch. The C# examples use [TwitcherSharp](https://github.com/Temptica/TwitcherSharp), the community-maintained .NET wrapper for Twitcher.
 
 ## Prerequisites
 
@@ -20,12 +21,17 @@ Before using `TwitchService`, you need to:
     *   `Scopes`: An `OAuthScopes` resource defining the permissions your application needs.
     *   `Token`: An `OAuthToken` resource where the user's access token will be stored after authentication.
 
+::: tip C# note
+In C#, `TwitchService.instance` from GDScript becomes the static property `TwitchService.Instance`. It returns the existing node if one is already in the scene, or `null` if none exists yet: call `TwitchService.CreateInstance()` to add one at the scene root from code instead of placing it in the editor.
+:::
 
 ## Initial Setup and Authentication
 
 The most crucial first step after getting the instance is to run the setup process, which includes authentication.
 
-```gdscript
+::: code-group
+
+```gdscript [GDScript]
 extends Node
 
 # Assume you have created a TwitchService node in your scene
@@ -51,12 +57,60 @@ func get_self_info():
         printerr("Could not get current user info.")
 ```
 
+```csharp [C#]
+using Godot;
+using System.Threading.Tasks;
+using TwitcherSharp;
+
+public partial class YourNode : Node
+{
+    // Assume you have created a TwitchService node in your scene
+
+    public override async void _Ready()
+    {
+        // Start the setup process (handles authentication)
+        // Returns true on success, false on failure (e.g., login run in timeout)
+        bool setupSuccessful = await TwitchService.Instance.Setup();
+
+        if (setupSuccessful)
+        {
+            GD.Print("Twitch Service successfully set up and authenticated!");
+            // Now you can proceed with other Twitch interactions
+            await GetSelfInfo();
+        }
+        else
+        {
+            GD.PrintErr("Twitch Service setup failed. Check authentication.");
+        }
+    }
+
+    // Example function called after successful setup
+    private async Task GetSelfInfo()
+    {
+        var currentUser = await TwitchService.Instance.GetCurrentUser();
+        if (currentUser != null)
+        {
+            GD.Print($"Authenticated as: {currentUser.DisplayName} (ID: {currentUser.Id})");
+        }
+        else
+        {
+            GD.PrintErr("Could not get current user info.");
+        }
+    }
+}
+```
+
+:::
+
 ## Common Usage Examples
 
 Here are simple examples for common tasks, assuming setup() has completed successfully
 
 ### Getting User Information
-```gdscript
+
+::: code-group
+
+```gdscript [GDScript]
 func _get_user_details(username: String) -> void:
     # Get user info by login name
     var user: TwitchUser = await TwitchService.instance.get_user(username)
@@ -71,9 +125,38 @@ func _get_user_details(username: String) -> void:
         print("User '%s' not found." % username)
 ```
 
+```csharp [C#]
+[Export] private Sprite2D _yourSprite2D;
+
+private async Task GetUserDetails(string username)
+{
+    // Get user info by login name
+    var user = await TwitchService.Instance.GetUser(username);
+    if (user != null)
+    {
+        GD.Print($"User found: {user.DisplayName}, ID: {user.Id}, Profile Image URL: {user.ProfileImageUrl}");
+
+        // You can then load the profile image (requires TwitchMediaLoader child)
+        var profileTexture = await TwitchService.Instance.GetProfileImage(user);
+        if (profileTexture != null)
+        {
+            _yourSprite2D.Texture = profileTexture; // Assign to a Sprite2D, TextureRect etc.
+        }
+    }
+    else
+    {
+        GD.Print($"User '{username}' not found.");
+    }
+}
+```
+
+:::
+
 ### Sending Chat Messages
 
-```gdscript
+::: code-group
+
+```gdscript [GDScript]
 func send_hello_message():
     var me = await TwitchService.instance.get_current_user()
     # Requires 'chat:read' and 'chat:edit' scopes
@@ -81,9 +164,23 @@ func send_hello_message():
     TwitchService.chat("Hello from Godot!")
 ```
 
+```csharp [C#]
+private async Task SendHelloMessage()
+{
+    var me = await TwitchService.Instance.GetCurrentUser();
+    // Requires 'chat:read' and 'chat:edit' scopes
+    GD.Print($"Sending 'Hello from Godot!' to channel ID: {me.Id}");
+    TwitchService.Instance.Chat("Hello from Godot!");
+}
+```
+
+:::
+
 ### Adding Chat Commands
 
-```gdscript
+::: code-group
+
+```gdscript [GDScript]
 func _ready():
     # Wait for setup first...
     var setup_successful = await TwitchService.instance.setup()
@@ -96,14 +193,52 @@ func _ready():
 
 # Callback function for the command
 func _on_hello_command(from_username: String, info: TwitchCommandInfo, args: PackedStringArray):
-    print("Received !hello command from %s" % info.user_display_name)
-    TwitchService.chat("Hi there, %s!" % info.user_display_name)
+    print("Received !hello command from %s" % info.username)
+    TwitchService.chat("Hi there, %s!" % info.username)
 ```
+
+```csharp [C#]
+using TwitcherSharp.Chat;
+
+private TwitchCommand _helloCommand;
+
+public override async void _Ready()
+{
+    // Wait for setup first...
+    bool setupSuccessful = await TwitchService.Instance.Setup();
+    if (setupSuccessful)
+    {
+        // Add a command handler for "!hello"
+        _helloCommand = TwitchService.Instance.AddCommand(new TwitchCommand { Command = "hello" });
+        _helloCommand.CommandReceived += OnHelloCommand;
+        GD.Print("Registered !hello command.");
+    }
+    else
+    {
+        GD.PrintErr("Setup failed, cannot add command.");
+    }
+}
+
+// Callback function for the command
+private void OnHelloCommand(string fromUsername, TwitchCommandInfo info, string[] args)
+{
+    GD.Print($"Received !hello command from {info.Username}");
+    TwitchService.Instance.Chat($"Hi there, {info.Username}!");
+}
+```
+
+:::
+
+::: tip C# note
+In C#, use the `AddCommand(TwitchCommand)` overload and subscribe to the returned command's `CommandReceived` event, as shown above. The `AddCommand(string, Callable)` overload (mirroring the GDScript `add_command` call) passes the callable straight through to GDScript and cannot marshal the native `TwitchCommandInfo` into the C# wrapper type, so it will fail at runtime for C# consumers — avoid it. See the [Commands](/commands/overview) section for more details.
+:::
 
 ### Subscribing to Events (EventSub)
 (Requires `TwitchEventsub` child node)
 
-```gdscript
+::: code-group
+
+```gdscript [GDScript]
 # Example: Subscribe to follows on your channel
 func subscribe_to_follows():
     # Ensure EventSub is connected first
@@ -118,11 +253,48 @@ func subscribe_to_follows():
 
     # Now, connect to the signal on the TwitchEventsub node itself
     # to receive the actual event notifications.
-    TwitchService.instance.eventsub.event_received.connect(_on_eventsub_event)
+    TwitchService.instance.eventsub.event.connect(_on_eventsub_event)
 
 
-func _on_eventsub_event(event_data: Dictionary):
-    if event_data.subscription.type == "channel.follow":
-        var follower_name = event_data.user_name
+func _on_eventsub_event(type: StringName, data: Dictionary):
+    if type == "channel.follow":
+        var follower_name = data.user_name
         print("New follower: %s!" % follower_name)
 ```
+
+```csharp [C#]
+using System.Threading.Tasks;
+using TwitcherSharp.EventSub;
+using TwitcherSharp.EventSub.Generated.ChannelFollow;
+
+// Example: Subscribe to follows on your channel
+private async Task SubscribeToFollows()
+{
+    // Ensure EventSub is connected first
+    await TwitchService.Instance.WaitForEventSubConnection();
+
+    var me = await TwitchService.Instance.GetCurrentUser();
+
+    var condition = new TwitchChannelFollowCondition(broadcasterUserId: me.Id, moderatorUserId: me.Id);
+    TwitchService.Instance.SubscribeEvent(TwitchEventSubDefinition.ChannelFollow, condition);
+
+    // Now, connect to the signal on the TwitchEventSub node itself
+    // to receive the actual event notifications.
+    TwitchEventSub.Instance.Event += OnEventSubEvent;
+}
+
+private void OnEventSubEvent(string type, Godot.Collections.Dictionary data)
+{
+    if (type == "channel.follow")
+    {
+        var followerName = data["user_name"].AsString();
+        GD.Print($"New follower: {followerName}!");
+    }
+}
+```
+
+:::
+
+::: tip C# note
+Unlike GDScript, `SubscribeEvent` takes a strongly-typed condition object (here `TwitchChannelFollowCondition`) instead of a raw `Dictionary`, so mismatched or missing condition keys are caught at compile time. Handling the raw `Event` signal like above works, but for most cases the typed `TwitchEventListener<T>` is easier: it gives you a `TwitchChannelFollowEvent` object instead of a raw dictionary. See [TwitchEventListener](/core-nodes/twitch-event-listener) for that pattern.
+:::

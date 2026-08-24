@@ -8,6 +8,10 @@ nodes. It simplifies handling asynchronous responses and includes basic retry ca
 This node acts as a wrapper and manager for individual `HTTPRequest` nodes. Instead of creating and managing `HTTPRequest` 
 nodes directly for each request, you use the `BufferedHTTPClient`. Its key features are:
 
+::: warning Not available in C#
+[TwitcherSharp](https://github.com/Temptica/TwitcherSharp) doesn't wrap `BufferedHTTPClient` as a standalone node you can instantiate from C#. What *is* available is `TwitcherSharp.Lib.Http.ResponseData` (the same shape as the `ResponseData` class described below) and `TwitchApi.Instance.Request(path, method, body, contentType)`, which uses `BufferedHTTPClient` internally for calls to the Twitch API; see the [TwitchAPI](/core-nodes/twitch-api) page. For general-purpose HTTP requests to endpoints other than Twitch's API from C#, reach for .NET's own `System.Net.Http.HttpClient` instead of trying to bind this node directly.
+:::
+
 1.  **Request Queuing (Implicit):** While it doesn't maintain an explicit *processing* queue in the code shown, 
     the `wait_for_request` mechanism effectively allows you to manage multiple requests sequentially by waiting for each 
     one to complete before proceeding. It handles the creation and management of underlying `HTTPRequest` nodes per request.

@@ -47,4 +47,5 @@ When you use Twitcher and want to be published here, you can write me via DM or 
 
 - https://kani-dev.itch.io/space-tentacles space shooter with viewer interaction
 - https://kani-dev.itch.io/twitcher-jumping-example jump game with viewer interaction [Source Code](https://github.com/kanimaru/twitcher-jumping-example/) 
+- https://temptica.itch.io/rebot RE:Bot, a semi-turn-based tank battler (inspired by Worms) where chat can control the battlefield with commands like `!shoot`, `!move`, and `!pickup`
 

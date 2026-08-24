@@ -1,7 +1,9 @@
-﻿# TwitchCommandContains Node
+# TwitchCommandContains Node
 
 The `TwitchCommandContains` node is a powerful yet easy-to-use tool for detecting the presence of specific keywords or
 phrases within chat messages. It triggers a signal when a message contains text that matches its configured list.
+
+<Badge type="tip" text="GDScript & C#" /> Every example on this page is available in both GDScript and C#: use the tabs on each code block to switch.
 
 ## Overview
 
@@ -57,6 +59,10 @@ This makes it perfect for simple keyword triggers, question detection, or filter
     * **`Global Cooldown` (`float`)**: The time in seconds that *everyone* must wait after the command is triggered
       before it can be used again. `0` for no cooldown.
 
+::: tip C# note
+`TwitchCommandContains` isn't a singleton in C#: bind it to the node you configured in the editor with `this.GetTwitcherNode<TwitchCommandContains>("...")` (from `TwitcherSharp.Extensions`). Its own properties carry over as `Contains` (`List<string>`), `MatchAll`, `MatchWord`.
+:::
+
 ## Signals
 
 * **`command_received(from_username: String, info: TwitchCommandInfo, args: PackedStringArray)`**
@@ -88,7 +94,9 @@ Let's create a bot that detects when a user mentions the word "lag" and puts the
 
 **2. Connect via Script:**
 
-```gdscript
+::: code-group
+
+```gdscript [GDScript]
 extends Node
 
 @onready var lag_detector: TwitchCommandContains = $LagDetector
@@ -112,3 +120,43 @@ func _on_lag_detected(from_username: String, info: TwitchCommandInfo, args: Pack
 func _on_lag_detector_cooldown(from_username: String, info: TwitchCommandInfo, args: PackedStringArray, remaining_s: float):
     print("User '%s' mentioned lag, but the command is on cooldown for %.1f more seconds." % [from_username, remaining_s])
     # We choose not to reply here to avoid spamming the user.
+```
+
+```csharp [C#]
+using Godot;
+using TwitcherSharp.Chat;
+using TwitcherSharp.Extensions;
+
+public partial class YourNode : Node
+{
+    private TwitchCommandContains _lagDetector;
+
+    public override void _Ready()
+    {
+        _lagDetector = this.GetTwitcherNode<TwitchCommandContains>("LagDetector");
+
+        _lagDetector.CommandReceived += OnLagDetected;
+        _lagDetector.Cooldown += OnLagDetectorCooldown;
+        GD.Print("Lag detector is now active.");
+    }
+
+    // This is called when a message contains "lag" and is NOT on cooldown.
+    private async void OnLagDetected(string fromUsername, TwitchCommandInfo info, string[] args)
+    {
+        GD.Print($"User '{fromUsername}' mentioned lag. Sending info.");
+
+        // Send a helpful reply
+        const string replyMessage = "If you are experiencing lag, try refreshing the stream or checking your connection. The current stream bitrate is X.";
+        await TwitchChat.Instance.SendMessage(replyMessage);
+    }
+
+    // This is called when a user mentions "lag" but the command is on global cooldown.
+    private void OnLagDetectorCooldown(string fromUsername, TwitchCommandInfo info, string[] args, float remainingS)
+    {
+        GD.Print($"User '{fromUsername}' mentioned lag, but the command is on cooldown for {remainingS:F1} more seconds.");
+        // We choose not to reply here to avoid spamming the user.
+    }
+}
+```
+
+:::

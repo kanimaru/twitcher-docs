@@ -4,6 +4,10 @@ Twitcher includes a simple, built-in logging system primarily designed for debug
 especially useful for nodes running in the editor (`@tool` scripts). It allows developers integrating Twitcher, 
 or developers working on Twitcher itself, to get filtered output without cluttering the console unnecessarily.
 
+::: warning Not available in C#
+[TwitcherSharp](https://github.com/Temptica/TwitcherSharp) doesn't wrap `TwitchLogger`, so there's no C# binding for creating your own instance the way GDScript integrators can with `TwitchLogger.new(...)`. For logging from C#, use Godot's regular `GD.Print()` / `GD.PrintErr()`, or a standard .NET logging library.
+:::
+
 ## Key Features
 
 *   **Configurable Levels:** Control the verbosity of logs (Off, Info, Debug).
