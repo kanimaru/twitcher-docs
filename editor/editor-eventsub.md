@@ -14,6 +14,18 @@ Instead of manually referencing Twitch documentation for every parameter, this h
 
 This significantly speeds up the setup process and reduces the chance of errors when defining which Twitch events your application needs to listen to.
 
+::: tip Optional and mutually-exclusive conditions
+Some subscription types list more condition fields than you're expected to fill in all at once. For example
+[`channel.raid`](https://dev.twitch.tv/docs/eventsub/eventsub-subscription-types/#channelraid) accepts either
+`from_broadcaster_user_id` or `to_broadcaster_user_id`, never both. Leave the ones you don't need blank in the
+Inspector (or omit them from the `condition` dictionary in code) — they're left out of the actual subscription
+request rather than being sent as empty values, which Twitch would otherwise reject.
+:::
+
+The full list of subscription types and their conditions in `TwitchEventsubDefinition` is generated directly from
+Twitch's documentation — the same approach used for the [TwitchAPI](/core-nodes/twitch-api) node — so it stays in
+sync as Twitch adds or updates EventSub subscription types.
+
 ![Using the EventSub Editor Helper to configure subscriptions](/editor-eventsub.gif)
 _(Caption: Using the EventSub Editor Helper to browse types, view conditions, and access documentation)_
 

@@ -15,8 +15,14 @@ The listener then connects to the general `event` signal of the provided `Twitch
 When *any* event comes from `TwitchEventsub`, this listener checks if the event's type matches the one it's configured for. 
 If it matches, the `TwitchEventListener` emits its own `received` signal, passing along the raw data dictionary for that specific event.
 
-**Important:** This node **does not create** the EventSub subscription with Twitch. It only listens for events from a 
-subscription that **must already be active** on the linked `TwitchEventsub` node.
+**Auto-subscribe:** When the `Subscription` type is selected, the Inspector shows the `condition` fields that
+subscription needs (the same UI used by `TwitchEventsubConfig`). Filling them in lets `TwitchEventListener` subscribe
+to Twitch on its own during `_ready()`, whenever the linked `TwitchEventsub` doesn't already have a matching
+subscription — useful for events you only listen to in one place, without setting up a separate
+`TwitchEventsubConfig`. If a subscription for that type already exists (with any conditions) on the `TwitchEventsub`
+node, that existing one is used instead and nothing new is created. Leave `condition` empty (or set
+`Ensure Subscription On Ready` to `false`) for a purely listen-only node whose subscription is configured entirely on
+the `TwitchEventsub` node.
 
 ::: tip C# note
 In C#, `TwitchEventListener` is a **generic class**: `TwitchEventListener<T>`, where `T` is the specific event type (e.g. `TwitchChannelFollowEvent`, `TwitchChannelChatMessageEvent`). This means the `received(data: Dictionary)` signal you'd get in GDScript becomes a strongly-typed `Received` event carrying a `T` object instead of a raw `Dictionary`, so `data["user_name"]` becomes `e.UserName` with compile-time checking and autocomplete. Every EventSub subscription type has a matching event class generated under `TwitcherSharp.EventSub.Generated.*`.
@@ -25,14 +31,17 @@ In C#, `TwitchEventListener` is a **generic class**: `TwitchEventListener<T>`, w
 ## Prerequisites
 
 1.  **Add the Node:** Add a `TwitchEventListener` node to your scene. It's often useful as a child of the node that needs to react to the specific event.
-2.  **EventSub Dependency:** Assign a configured and active `TwitchEventsub` instance to the `Eventsub` property in the Inspector.
-3.  **Existing Subscription:** Ensure that the `TwitchEventsub` node assigned in step 2 is **already subscribed** to the 
-    event type you intend to listen for with this `TwitchEventListener`.
+2.  **EventSub Dependency:** Assign a configured `TwitchEventsub` instance to the `Eventsub` property in the Inspector. (Autobinding will use the first Eventsub found in the scene)
+3.  **Conditions:** Either fill in the `Condition` fields shown for the selected `Subscription` so the listener can subscribe
+    itself, or make sure the `TwitchEventsub` node assigned in step 2 is **already subscribed** to the event type you
+    intend to listen for.
 
 ## Configuration (Inspector Properties)
 
 *   **`Eventsub` (`TwitchEventsub`)**: **Required.** The instance of `TwitchEventsub` that this listener will connect to and receive events from. Automatically assigned if only one instance of `TwitchEventsub` exists.
-*   **`Subscription` (`TwitchEventsubDefinition.Type`)**: **Required.** Select the specific type of EventSub event this listener should react to from the enum list (e.g., `CHANNEL_FOLLOW`, `CHANNEL_SUBSCRIBE`, `CHANNEL_CHEER`, `CHANNEL_CHANNEL_POINTS_CUSTOM_REWARD_REDEMPTION`, etc.).
+*   **`Subscription` (`TwitchEventsubDefinition.Type`)**: **Required.** Select the specific type of EventSub event this listener should react to from the enum list (e.g., `CHANNEL_FOLLOW`, `CHANNEL_SUBSCRIBE`, `CHANNEL_CHEER`, `CHANNEL_CHANNEL_POINTS_CUSTOM_REWARD_REDEMPTION`, etc.). A "To dev.twitch.tv" button next to it links straight to Twitch's documentation for the selected type.
+*   **`Condition` (`Dictionary`)**: The condition values (e.g. `broadcaster_user_id`, `moderator_user_id`) required by the selected `Subscription`, shown as one input field per condition. Only used to subscribe when the `TwitchEventsub` doesn't already have a matching subscription — leave it empty to rely entirely on a subscription configured elsewhere.
+*   **`Ensure Subscription On Ready` (`bool`)**: Default `true`. When enabled, the listener calls `ensure_subscription()` in `_ready()` to subscribe itself if needed. Set to `false` if you want to manage subscribing manually (e.g. to call `ensure_subscription()` later, once the required user IDs are known).
 
 ::: tip C# note
 In C#, `Subscription` becomes `SubscriptionDefinition` (a `TwitchEventSubDefinition`, e.g. `TwitchEventSubDefinition.ChannelFollow`) and can be set either in the editor on a `TwitchEventListener` node, or directly from code before adding the node to the scene tree; see the usage example below.
@@ -61,19 +70,34 @@ In C#, `Subscription` becomes `SubscriptionDefinition` (a `TwitchEventSubDefinit
         This prevents the listener from processing further events until `start_listening()` is called again. 
         This is usually called automatically when the node exits the scene tree (`_exit_tree`).
 
+*   **`ensure_subscription() -> void`**
+    *   Makes sure the `TwitchEventsub` has a subscription this listener can receive events from: it looks for an
+        existing subscription of the selected `Subscription` type first, and if none is found, subscribes on its own
+        using `Condition` (if fully filled in). Called automatically in `_ready()` when `Ensure Subscription On Ready`
+        is `true`. Logs an error via `TwitchLogger` if no matching subscription exists and `Condition` isn't complete
+        enough to create one, or if Twitch rejects the subscription (see `TwitchEventsub`'s `subscription_failed` signal).
+
+*   **`get_conditions() -> Dictionary`**
+    *   Returns the `Condition` values that would be used to subscribe, resolving any user picked via the Inspector's
+        user-search field to their user ID.
+
+*   **`get_missing_conditions() -> Array[StringName]`**
+    *   Returns the condition keys required by the selected `Subscription` that don't have a value yet.
+
 ::: tip C# note
 Same in C#: `listener.StartListening()` / `listener.StopListening()`.
 :::
-
 ## Usage Example
 
-Imagine you want a specific Node (`MyFollowHandler`) to react *only* to follow events.
+Imagine you want a specific Node (`MyFollowHandler`) to react *only* to follow events, and have it subscribe itself
+rather than configuring `channel.follow` separately on the `TwitchEventsub` node.
 
-1.  Ensure your main `TwitchEventsub` node is configured and subscribing to `CHANNEL_FOLLOW` events.
-2.  Add a `TwitchEventListener` node (e.g., as a child of `MyFollowHandler`).
-3.  In the Inspector for the `TwitchEventListener`:
+1.  Add a `TwitchEventListener` node (e.g., as a child of `MyFollowHandler`).
+2.  In the Inspector for the `TwitchEventListener`:
     *   Assign your main `TwitchEventsub` node to the `Eventsub` property.
     *   Select `CHANNEL_FOLLOW` for the `Subscription` property.
+    *   Fill in the `broadcaster_user_id` (and `moderator_user_id`) fields that appear under `Condition` — e.g. using
+        the user-search field, or leave `Condition` empty if `channel.follow` is already subscribed elsewhere.
 
 ::: code-group
 
