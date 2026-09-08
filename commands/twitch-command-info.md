@@ -14,10 +14,11 @@ command.
 
 ## Properties
 
-* **`command_node` (`TwitchCommandBase`)**: A direct reference to the command node instance that was triggered (e.g.,
+* **`command` (`TwitchCommandBase`)**: A direct reference to the command node instance that was triggered (e.g.,
   the specific `TwitchCommand` or `TwitchCommandRegex` node).
-* **`channel_name` (`StringName`)**: The name of the channel (broadcaster's login name) where the command was triggered.
-* **`username` (`StringName`)**: The login name of the user who triggered the command.
+* **`channel_name` (`String`)**: The name of the channel (broadcaster's login name) where the command was triggered.
+* **`username` (`String`)**: The login name of the user who triggered the command.
+* **`user_id` (`String`)**: The user ID of the user who triggered the command.
 * **`original_message` (`Variant`)**: The original, unprocessed data object for the message.
     * For chat messages from EventSub, this will typically be a `TwitchChatMessage` object.
     * For whispers, this may be a `Dictionary` containing the raw whisper event data.
@@ -29,7 +30,7 @@ command.
     * For `TwitchCommandContains`: The keywords from the `contains` list that were found.
 
 ::: tip C# note
-Properties carry over 1:1 in PascalCase: `Command` (equivalent to `command_node`, typed as `TwitchCommand`), `ChannelName`, `Username`, `TextMessage`, `Arguments` (a `List<string>`). For `original_message`, C# splits it in two: `OriginalMessage` is the raw `Variant` (matching GDScript exactly), while `ChatMessage` is a convenience shortcut that's already cast to `TwitchChatMessage`, non-null only when `MessageType` is a chat message (there's also `WhisperMessage`, a `Dictionary`, for whispers).
+Properties carry over 1:1 in PascalCase: `Command` (typed as `TwitchCommand`), `ChannelName`, `Username`, `UserId`, `TextMessage`, `Arguments` (a `List<string>`). For `original_message`, C# splits it in two: `OriginalMessage` is the raw `Variant` (matching GDScript exactly), while `ChatMessage` is a convenience shortcut that's already cast to `TwitchChatMessage`, non-null only when `MessageType` is a chat message (there's also `WhisperMessage`, a `Dictionary`, for whispers).
 :::
 
 ## Usage Example
@@ -58,8 +59,8 @@ func _on_any_command(from_username: String, info: TwitchCommandInfo, args: Packe
     print("Full message text: '%s'" % info.text_message)
 
     # Access the node that was triggered
-    print("Command node name: %s" % info.command_node.command)
-    print("Command is on user cooldown for: %s seconds" % info.command_node.user_cooldown)
+    print("Command node name: %s" % info.command.command)
+    print("Command is on user cooldown for: %s seconds" % info.command.user_cooldown)
 
     # Access low-level data for a reply
     if info.original_message is TwitchChatMessage:

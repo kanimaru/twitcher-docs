@@ -58,6 +58,7 @@ export default defineConfig({
           { text: 'TwitchCommandRegex', link: '/commands/twitch-command-regex' },
           { text: 'TwitchCommandContains', link: '/commands/twitch-command-contains' },
           { text: 'TwitchCommandHelp', link: '/commands/twitch-command-help' },
+          { text: 'TwitchCommandRespond (No-code reply)', link: '/commands/twitch-chat-command-respond' },
           { text: 'TwitchCommandInfo (Data)', link: '/commands/twitch-command-info' },
         ]
       },

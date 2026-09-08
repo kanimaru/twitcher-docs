@@ -21,6 +21,8 @@ Every command type below is available from C# too: each page has a GDScript/C# t
   phrases. A simpler alternative to regex for keyword detection.
 * **[TwitchCommandHelp](twitch-command-help.md):** A specialized command that automatically generates a help message
   listing other available commands.
+* **[TwitchCommandRespond](twitch-chat-command-respond.md):** Not a command type on its own — add it as a child of any
+  command node above to reply with a fixed message when that command triggers, without writing a script.
 
 ### Key Data Object
 
