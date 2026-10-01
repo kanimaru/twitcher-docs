@@ -90,12 +90,12 @@ Twitcher writes a log file without any setup. With the default settings:
 A file looks like this:
 
 ```
-# session.start 2026-10-01T21:09:46.035Z godot.version="4.7-stable (official)" os.type=windows runtime=game service.name=MyGame service.version=1.2.0 twitcher.version=2.5.1
+# session.start 2026-10-01T21:09:46.035Z godot.version="4.7-stable (official)" os.type=windows process.pid=1234 runtime=game service.name=MyGame service.version=1.2.0 twitcher.version=2.5.1
 2026-10-01T21:09:46.036Z INFO  [TwitchAuth] Token got authorized {expires_in=3600}
 2026-10-01T21:09:47.120Z WARN  [TwitchChat] Message couldn't be sent cause of [msg_rejected]: blocked
 ```
 
-The first line describes the session: game name and version (from **Application → Config**), Twitcher and Godot version, operating system.
+The first line describes the session: game name and version (from **Application → Config**), Twitcher and Godot version, operating system, process id, and whether it ran in the editor, headless or as a game.
 
 ### Settings
 
@@ -127,14 +127,16 @@ func _on_copy_log_path_pressed() -> void:
 	DisplayServer.clipboard_set(TwitchLogfamiBridge.get_log_file_path())
 ```
 
+`get_log_file_path()` returns an empty string while `twitcher/logs/file/level` is `off`.
+
 * **By hand:** see the paths per operating system on the [Support](/introduction/support#send-us-your-log-file) page.
 
 ## Headless Servers
 
-With `twitcher/logs/stdout/level` on `auto` (the default), headless and dedicated server builds also print every record as one JSON object per line to stdout, the format container log collectors (Docker, Kubernetes, Grafana Loki, Datadog, CloudWatch) read best. Each line carries the game and version, so lines from several servers stay distinguishable:
+With `twitcher/logs/stdout/level` on `auto` (the default), headless and dedicated server builds also print every record at info level and above as one JSON object per line to stdout, the format container log collectors (Docker, Kubernetes, Grafana Loki, Datadog, CloudWatch) read best. Each line carries the game and version, so lines from several servers stay distinguishable:
 
 ```json
-{"timestamp":"2026-10-01T21:09:46.036Z","severity_text":"INFO","severity_number":9,"scope":"TwitchAuth","body":"Token got authorized","attributes":{"expires_in":3600},"resource":{"service.name":"MyGame","twitcher.version":"2.5.1"}}
+{"timestamp":"2026-10-01T21:09:46.036Z","severity_text":"INFO","severity_number":9,"scope":"TwitchAuth","body":"Token got authorized","attributes":{"expires_in":3600},"resource":{"godot.version":"4.7-stable (official)","os.type":"windows","process.pid":1234,"runtime":"headless","service.name":"MyGame","service.version":"1.2.0","twitcher.version":"2.5.1"}}
 ```
 
 While stdout logging is active, the colored console output is switched off, so lines don't appear twice. Set the level to `off` to disable stdout, or to a level to force it on everywhere.
@@ -156,7 +158,7 @@ func _on_twitcher_log(record: Dictionary) -> void:
 	$DebugOverlay.add_line("%s %s" % [record["scope"], record["body"]])
 ```
 
-Every record has these keys (it's read-only; never rename them in your handler, new ones may be added):
+Every record has these keys. The record is read-only; existing keys are never renamed or removed, new ones may be added:
 
 | Key | Type | Content |
 |---|---|---|
@@ -173,10 +175,10 @@ Other useful calls:
 
 * `TwitchLoggerManager.remove_handler(callable)`
 * `TwitchLoggerManager.clear_handlers()` removes everything, the console included; `install_console_handler()` brings the console back.
-* To replace the built-in log file with your own setup, set `TwitchLogfamiBridge.auto_install = false` before any Twitcher class loads (e.g. in an autoload that comes first), or call `TwitchLogfamiBridge.uninstall()`.
+* To replace the built-in log file with your own setup, set `TwitchLogfamiBridge.auto_install = false` before the first log call, e.g. in the `_init()` of an autoload. Creating loggers doesn't count as logging, so `static var _log: TwitchLogger` declarations in your scripts don't get in the way. In the editor the plugin logs as soon as it loads, so call `TwitchLogfamiBridge.uninstall()` there instead; it also switches `auto_install` off.
 
 Handlers run on the thread that logged. A record logged from inside a handler is dropped instead of recursing.
 
 ::: tip Prefer methods over lambdas
-Lambda handlers work, but Godot frees a lambda together with its script during shutdown. Twitcher therefore removes lambda handlers when the scene tree shuts down, after your nodes logged their last lines. Methods (like `_on_twitcher_log` above) don't have this limitation. In a `-s` main loop script (`extends SceneTree`), remove lambda handlers yourself before calling `quit()`.
+Lambda handlers work, but Godot frees a lambda together with its script during shutdown, so Twitcher removes lambda handlers when the scene tree shuts down, after your nodes logged their last lines. Methods, bound or not (like `_on_twitcher_log` above), stay registered. If your program quits before its first frame, call `TwitchLoggerManager.remove_lambda_handlers()` yourself before `quit()`.
 :::
