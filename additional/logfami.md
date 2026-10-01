@@ -42,7 +42,7 @@ func _ready() -> void:
 This writes `user://logs/my_game.log`:
 
 ```
-# session.start 2026-10-01T10:00:00.000Z godot.version="4.7-stable (official)" os.type=windows runtime=game service.name=MyGame service.version=1.2.0
+# session.start 2026-10-01T10:00:00.000Z godot.version="4.7-stable (official)" os.type=windows process.pid=1234 runtime=game service.name=MyGame service.version=1.2.0
 2026-10-01T10:00:00.123Z INFO  [Shop] Item bought {id=42}
 ```
 
@@ -50,7 +50,7 @@ This writes `user://logs/my_game.log`:
 
 `LogfamiLevel.Severity` uses the OpenTelemetry severity numbers: `TRACE` 1, `DEBUG` 5, `INFO` 9, `WARN` 13, `ERROR` 17, `FATAL` 21. `LogfamiLevel.OFF` is a threshold that accepts nothing.
 
-*   `LogfamiLevel.threshold_from_text("info")` parses setting values (`off`, `trace`, `debug`, `info`, `warn`, `error`, `fatal`).
+*   `LogfamiLevel.threshold_from_text("info")` parses setting values (`off`, `trace`, `debug`, `info`, `warn` or `warning`, `error`, `fatal`).
 *   `LogfamiLevel.to_syslog(level)` maps to RFC 5424 syslog severities.
 
 ## Formats
@@ -113,7 +113,7 @@ Add your own with `resource.with_attribute("build", "nightly")` and pass the res
 | Secrets as key/value or JSON | `access_token=abc`, `"client_secret":"abc"` | `access_token=[REDACTED]` |
 | OAuth code in URLs | `/callback?code=abc&state=x` | `/callback?code=[REDACTED]&state=x` |
 
-Attributes whose key contains `token`, `secret`, `password`, `authorization`, `cookie` or `api_key` are masked as a whole. `with_defaults(true)` also masks any long string mixing letters and digits; it's off by default because it also hits hashes and IDs.
+Attributes whose key contains `token`, `secret`, `password`, `authorization`, `cookie`, `api_key` or `apikey` are masked as a whole. `with_defaults(true)` also masks any long string mixing letters and digits; it's off by default because it also hits hashes and IDs.
 
 Add your own rules:
 
@@ -150,7 +150,7 @@ Keeps lines and records in arrays: handy for tests or an in-game log viewer.
 
 ## Engine Errors
 
-`LogfamiEngineCapture` registers itself through `OS.add_logger()` and forwards Godot's own errors and warnings (`push_error`, `push_warning`, script and shader errors) to Logfami, with the source location as `code.function`, `code.filepath` and `code.lineno` attributes:
+`LogfamiEngineCapture` registers itself through `OS.add_logger()` and forwards Godot's own errors and warnings (`push_error`, `push_warning`, script and shader errors) to Logfami, with the source location as `code.function`, `code.filepath` and `code.lineno` attributes, plus `error.type` (`error`, `warning`, `script` or `shader`):
 
 ```gdscript
 var capture: LogfamiEngineCapture = LogfamiEngineCapture.new(logfami)
@@ -165,7 +165,7 @@ Set `capture_messages = true` to also forward `print()` output. Lines Logfami pr
 *   **`set_logger(error, info, debug)` libraries:** `logfami.as_triple("Http")` returns three callables taking a `String`, matching the convention of Twitcher's HTTP and OAuth libraries:
 
 ```gdscript
-const HttpUtil = preload("res://addons/twitcher/lib/http/http_util.gd")
+const HttpUtil: GDScript = preload("res://addons/twitcher/lib/http/http_util.gd")
 
 var triple: Array[Callable] = logfami.as_triple("Http")
 HttpUtil.set_logger(triple[0], triple[1], triple[2])
