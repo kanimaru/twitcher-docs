@@ -79,6 +79,8 @@ export default defineConfig({
           { text: 'Websocket', link: '/additional/websocket.md' },
           { text: 'SpriteFrameEffect', link: '/additional/sprite-frame-effect.md' },
           { text: 'Paging', link: '/additional/paging.md' },
+          { text: 'Logger', link: '/additional/logger.md' },
+          { text: 'Logfami', link: '/additional/logfami.md' },
         ]
       },
       { text: 'Showcase', link: 'showcase' },
