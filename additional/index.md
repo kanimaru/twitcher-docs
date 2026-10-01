@@ -16,9 +16,15 @@ It also includes basic automatic retry logic with exponential backoff for connec
 
 ## Logger
 
-Twitcher includes a simple, built-in logging system primarily designed for debugging the addon's components,
-especially useful for nodes running in the editor (`@tool` scripts). It allows developers integrating Twitcher,
-or developers working on Twitcher itself, to get filtered output without cluttering the console unnecessarily.
+Twitcher includes a built-in logging system with two jobs: filtered, colored console output per component while you
+develop, and a log file (`user://logs/twitcher.log`) written out of the box, so players can send it in when something
+goes wrong. On headless servers it also prints JSON Lines to stdout. See [Logger](/additional/logger).
+
+## Logfami
+
+Logfami is the standalone structured logging library behind Twitcher's log file. It routes records through pipelines
+with their own filter, redaction, format (text, JSON Lines, logfmt) and destination (rolling file, stdout, memory).
+It doesn't depend on Twitcher, so you can use it for your own game's logs too. See [Logfami](/additional/logfami).
 
 # SpriteFrameEffect for RichTextLabel
 
