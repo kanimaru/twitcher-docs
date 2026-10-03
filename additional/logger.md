@@ -28,7 +28,7 @@ Under the hood, Twitcher only creates log records and hands them to *handlers*. 
 | Warn | `_log.w()` | Something went wrong but Twitcher can carry on, e.g. a chat message Twitch dropped. |
 | Error | `_log.e()` | Something failed. |
 
-Levels follow the [OpenTelemetry severity numbers](https://opentelemetry.io/docs/specs/otel/logs/data-model/#field-severitynumber) (`TwitchLogLevel.Severity`: TRACE 1, DEBUG 5, INFO 9, WARN 13, ERROR 17, FATAL 21), so they map cleanly onto syslog and log collectors.
+Levels follow the [OpenTelemetry severity numbers](https://opentelemetry.io/docs/specs/otel/logs/data-model/#field-severitynumber) (`LogfamiLevel.Severity`: TRACE 1, DEBUG 5, INFO 9, WARN 13, ERROR 17, FATAL 21), so they map cleanly onto syslog and log collectors.
 
 ## Usage
 
@@ -55,7 +55,7 @@ func buy(item_id: int, price: int) -> void:
 If building a message is expensive, ask first whether anyone receives it:
 
 ```gdscript
-if _log.wants(TwitchLogLevel.Severity.DEBUG):
+if _log.wants(LogfamiLevel.Severity.DEBUG):
 	_log.d("State dump: %s" % _build_big_dump())
 ```
 
@@ -151,7 +151,7 @@ A handler is any `Callable` taking one `Dictionary`. Register it with a minimum 
 
 ```gdscript
 func _ready() -> void:
-	TwitchLoggerManager.add_handler(_on_twitcher_log, TwitchLogLevel.Severity.WARN)
+	TwitchLoggerManager.add_handler(_on_twitcher_log, LogfamiLevel.Severity.WARN)
 
 
 func _on_twitcher_log(record: Dictionary) -> void:
